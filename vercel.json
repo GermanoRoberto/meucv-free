@@ -2,10 +2,6 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/api/gemini",
-      "destination": "/docs/api/gemini.js"
-    },
-    {
       "source": "/(.*)",
       "destination": "/docs/$1"
     }
