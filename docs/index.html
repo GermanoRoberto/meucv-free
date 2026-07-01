@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu CV Free | Criador de Currículo ATS Gratuito com IA</title>
+  <meta name="description" content="Crie, analise e otimize seu currículo para sistemas ATS 100% grátis. Importe PDFs, adapte para vagas com IA e exporte em PDF profissional.">
+  
+  <!-- Fontes do Google -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Georgia&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- PDF.js para extração de texto local -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ================= LANDING PAGE / DASHBOARD ================= -->
+  <div id="landing-page" class="view-active">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="logo">
+          <i data-lucide="file-text" class="logo-icon"></i>
+          <span>Meu CV <span class="badge-free">FREE</span></span>
+        </div>
+        <div class="nav-links">
+          <button id="btn-nav-support" class="btn btn-secondary" style="border-color: rgba(239, 68, 68, 0.25); color: var(--ui-danger); background-color: rgba(239, 68, 68, 0.03);" title="Apoiar Projeto">
+            <i data-lucide="heart" style="fill: var(--ui-danger); color: var(--ui-danger);"></i> Apoiar
+          </button>
+          <button id="btn-open-cv-list-nav" class="btn btn-secondary">
+            <i data-lucide="folder-open"></i> Meus Currículos
+          </button>
+          <button id="btn-open-settings-nav" class="btn btn-icon-only" title="Configurações de IA">
+            <i data-lucide="bot"></i>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="hero-bg-glow"></div>
+      <div class="hero-content">
+        <h1 class="hero-title">O Criador de Currículos ATS que é <span class="gradient-text">100% Gratuito e Privado</span></h1>
+        <p class="hero-subtitle">Crie currículos limpos que passam em sistemas de recrutamento (ATS). Importe seu PDF antigo, use inteligência artificial para adaptá-lo a vagas de emprego e exporte PDFs profissionais sem marcas d'água ou cobranças.</p>
+        
+        <div class="hero-actions">
+          <button id="btn-create-new" class="btn btn-primary btn-lg">
+            <i data-lucide="plus-circle"></i> Criar Currículo do Zero
+          </button>
+          <button id="btn-trigger-import-pdf" class="btn btn-secondary btn-lg">
+            <i data-lucide="file-up"></i> Importar PDF Existente
+          </button>
+        </div>
+
+        <div class="features-badge">
+          <span><i data-lucide="shield-check"></i> 100% Privado (Dados Locais)</span>
+          <span><i data-lucide="ban"></i> Sem Assinaturas</span>
+          <span><i data-lucide="cpu"></i> Otimizado com Gemini IA</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Features Grid -->
+    <section class="features-section">
+      <h2 class="section-title">Por que usar o Meu CV Free?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="eye"></i></div>
+          <h3>Layout Otimizado ATS</h3>
+          <p>Modelos limpos recomendados por recrutadores. Sem tabelas complexas, colunas duplas confusas ou gráficos que impedem a leitura pelos sistemas.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="sparkles"></i></div>
+          <h3>Melhorias com IA</h3>
+          <p>Conecte sua chave Gemini gratuita e otimize seus textos instantaneamente. Escreva resumos e descrições com linguagem profissional de alto impacto.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="trending-up"></i></div>
+          <h3>Score de Aderência ATS</h3>
+          <p>Cole a descrição da vaga desejada e veja na hora o seu score de compatibilidade, palavras-chave encontradas e o que ainda precisa adicionar.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon"><i data-lucide="key-round"></i></div>
+          <h3>Privacidade Total</h3>
+          <p>Seus dados são seus. Suas chaves de API e currículos ficam guardados com segurança apenas no seu navegador, sem servidores intermediários.</p>
+        </div>
+    </section>
+
+    <!-- Donation / Support Section -->
+    <section class="support-project-section" style="max-width: 800px; margin: 40px auto; padding: 24px; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--ui-border); border-radius: var(--radius-lg); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);">
+      <h3 style="font-size: 1.15rem; color: #fff; display: flex; align-items: center; gap: 8px; font-weight: 600;"><i data-lucide="heart" style="color: var(--ui-danger); fill: var(--ui-danger);"></i> Apoie o Desenvolvimento do Meu CV Free</h3>
+      <p style="font-size: 0.85rem; color: var(--ui-text-secondary); max-width: 600px; line-height: 1.55; margin: 0;">
+        Este projeto é mantido de forma 100% gratuita, livre de anúncios ou cobranças premium. Se esta ferramenta te ajudou a conseguir uma entrevista ou a estruturar seu currículo, considere fazer uma contribuição voluntária para apoiar os custos de manutenção e futuras melhorias do projeto!
+      </p>
+      <button id="btn-support-donation" class="btn btn-secondary btn-sm" style="margin-top: 8px; border-color: rgba(239, 68, 68, 0.25); color: var(--ui-danger); background-color: rgba(239, 68, 68, 0.05); font-weight: 600; padding: 10px 18px;">
+        <i data-lucide="heart" style="fill: var(--ui-danger); color: var(--ui-danger);"></i> Contribuir com o Projeto (Pix)
+      </button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2026 Meu CV Free. Feito com foco em privacidade e empregabilidade.</p>
+    </footer>
+  </div>
+
+  <!-- ================= EDITOR WORKSPACE ================= -->
+  <div id="editor-workspace" class="view-hidden">
+    <!-- Workspace Header -->
+    <header class="editor-header">
+      <div class="header-left">
+        <button id="btn-back-dashboard" class="btn btn-icon-only" title="Voltar ao início" aria-label="Voltar ao início">
+          <i data-lucide="arrow-left"></i>
+        </button>
+        <div class="cv-title-area">
+          <input type="text" id="input-cv-name" value="Meu Currículo Profissional" title="Clique para renomear">
+          <span class="save-status"><i data-lucide="cloud-lightning"></i> Salvo Localmente</span>
+        </div>
+      </div>
+      
+      <!-- Top Workspace Navigation -->
+      <nav class="app-nav-tabs">
+        <button class="nav-tab active" data-workspace="workspace-editor"><i data-lucide="edit-3"></i><span>Currículo</span></button>
+        <button class="nav-tab" data-workspace="workspace-ats"><i data-lucide="target"></i><span>Otimizador ATS</span></button>
+        <button class="nav-tab" data-workspace="workspace-linkedin"><i data-lucide="linkedin"></i><span>LinkedIn</span></button>
+        <button class="nav-tab" data-workspace="workspace-guide"><i data-lucide="book-open"></i><span>Guia de Excelência</span></button>
+      </nav>
+      
+      <div class="header-actions">
+        <div class="template-selector">
+          <label for="select-template">Modelo:</label>
+          <select id="select-template">
+            <option value="classic">Clássico Minimalista</option>
+            <option value="modern">Moderno Corporativo</option>
+            <option value="creative">Executivo Elegante</option>
+          </select>
+        </div>
+        <button id="btn-editor-support" class="btn btn-secondary btn-icon" style="border-color: rgba(239, 68, 68, 0.25); color: var(--ui-danger); background-color: rgba(239, 68, 68, 0.03);" title="Apoiar este projeto">
+          <i data-lucide="heart" style="fill: var(--ui-danger); color: var(--ui-danger);"></i> <span>Apoiar</span>
+        </button>
+        <button id="btn-open-settings" class="btn btn-secondary btn-icon" title="Configurar IA">
+          <i data-lucide="bot"></i> <span>Chave Gemini IA</span>
+        </button>
+        <button id="btn-open-cv-list" class="btn btn-secondary btn-icon" title="Ver meus currículos salvos">
+          <i data-lucide="folder"></i> <span>Biblioteca</span>
+        </button>
+        <button id="btn-export-pdf" class="btn btn-primary btn-icon">
+          <i data-lucide="download"></i> <span>Exportar PDF</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Workspace Main Layout -->
+    <div id="workspace-editor" class="workspace-pane active">
+      <div class="workspace-container">
+      
+      <!-- Editor Sidebar (Left) -->
+      <aside class="editor-sidebar">
+        
+        <!-- Tab Navigation -->
+        <div class="editor-tabs">
+          <button class="tab-btn active" data-tab="tab-personal"><i data-lucide="user"></i><span>Contato</span></button>
+          <button class="tab-btn" data-tab="tab-summary"><i data-lucide="align-left"></i><span>Resumo</span></button>
+          <button class="tab-btn" data-tab="tab-experience"><i data-lucide="briefcase"></i><span>Experiências</span></button>
+          <button class="tab-btn" data-tab="tab-education"><i data-lucide="graduation-cap"></i><span>Educação</span></button>
+          <button class="tab-btn" data-tab="tab-skills"><i data-lucide="award"></i><span>Habilidades</span></button>
+        </div>
+
+        <!-- Tab Contents Container -->
+        <div class="tab-content-container">
+
+          <!-- TAB: PERSONAL INFO -->
+          <div id="tab-personal" class="tab-pane active">
+            <h2 class="tab-title">Dados Pessoais & Contato</h2>
+            <div class="form-grid">
+              <div class="form-group col-span-2">
+                <label for="personal-name">Nome Completo</label>
+                <input type="text" id="personal-name" placeholder="Ex: João da Silva">
+              </div>
+              <div class="form-group col-span-2">
+                <label for="personal-title">Cargo / Profissão Principal</label>
+                <input type="text" id="personal-title" placeholder="Ex: Desenvolvedor Front-End Sênior">
+              </div>
+              <div class="form-group">
+                <label for="personal-email">E-mail</label>
+                <input type="email" id="personal-email" placeholder="Ex: joao.silva@email.com">
+              </div>
+              <div class="form-group">
+                <label for="personal-phone">Telefone</label>
+                <input type="text" id="personal-phone" placeholder="Ex: (11) 98765-4321">
+              </div>
+              <div class="form-group">
+                <label for="personal-location">Localização (Cidade, Estado)</label>
+                <input type="text" id="personal-location" placeholder="Ex: São Paulo, SP">
+              </div>
+              <div class="form-group">
+                <label for="personal-linkedin">LinkedIn (URL ou Username)</label>
+                <input type="text" id="personal-linkedin" placeholder="Ex: linkedin.com/in/joaosilva">
+              </div>
+              <div class="form-group">
+                <label for="personal-github">GitHub / Portfólio (URL)</label>
+                <input type="text" id="personal-github" placeholder="Ex: github.com/joaosilva">
+              </div>
+              <div class="form-group">
+                <label for="personal-website">Site Pessoal / Outros</label>
+                <input type="text" id="personal-website" placeholder="Ex: joaosilva.dev">
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: SUMMARY -->
+          <div id="tab-summary" class="tab-pane">
+            <div class="tab-title-row">
+              <h2 class="tab-title">Resumo Profissional</h2>
+              <button class="btn btn-sm btn-ai-action" id="btn-ai-improve-summary">
+                <i data-lucide="sparkles"></i> Melhorar com IA
+              </button>
+            </div>
+            <p class="tab-description">Um resumo de 3 a 5 linhas destacando suas principais qualificações, anos de experiência e realizações marcantes.</p>
+            <div class="form-group">
+              <textarea id="personal-summary" rows="8" placeholder="Descreva sua trajetória profissional de forma atrativa e direta..."></textarea>
+            </div>
+          </div>
+
+          <!-- TAB: EXPERIENCE -->
+          <div id="tab-experience" class="tab-pane">
+            <div class="tab-title-row">
+              <h2 class="tab-title">Histórico Profissional</h2>
+              <button class="btn btn-secondary btn-sm" id="btn-add-experience">
+                <i data-lucide="plus"></i> Adicionar Cargo
+              </button>
+            </div>
+            <div id="experience-list" class="repeater-list">
+              <!-- Cards de Experiência Dinâmicos -->
+            </div>
+          </div>
+
+          <!-- TAB: EDUCATION -->
+          <div id="tab-education" class="tab-pane">
+            <div class="tab-title-row">
+              <h2 class="tab-title">Formação Acadêmica</h2>
+              <button class="btn btn-secondary btn-sm" id="btn-add-education">
+                <i data-lucide="plus"></i> Adicionar Formação
+              </button>
+            </div>
+            <div id="education-list" class="repeater-list">
+              <!-- Cards de Educação Dinâmicos -->
+            </div>
+          </div>
+
+          <!-- TAB: SKILLS & OTHER -->
+          <div id="tab-skills" class="tab-pane">
+            <h2 class="tab-title">Habilidades, Idiomas e Certificações</h2>
+            
+            <!-- Skills Section -->
+            <div class="section-group">
+              <h3 class="section-group-title">Habilidades Técnicas & Interpessoais</h3>
+              <p class="tab-description">Insira palavras-chave relevantes para a sua área. Use vírgulas para separar as habilidades.</p>
+              <div class="form-group">
+                <input type="text" id="skills-input" placeholder="Ex: React, Node.js, Python, Scrum, Liderança de Equipes">
+                <div id="skills-tags-container" class="tags-container">
+                  <!-- Chips de habilidades aparecem aqui -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Languages Section -->
+            <div class="section-group">
+              <div class="tab-title-row">
+                <h3 class="section-group-title">Idiomas</h3>
+                <button class="btn btn-secondary btn-sm" id="btn-add-language">
+                  <i data-lucide="plus"></i> Adicionar Idioma
+                </button>
+              </div>
+              <div id="languages-list" class="repeater-list">
+                <!-- Lista de Idiomas Dinâmicos -->
+              </div>
+            </div>
+
+            <!-- Certifications & Projects Section -->
+            <div class="section-group">
+              <div class="tab-title-row">
+                <h3 class="section-group-title">Certificados e Projetos</h3>
+                <button class="btn btn-secondary btn-sm" id="btn-add-cert">
+                  <i data-lucide="plus"></i> Adicionar Item
+                </button>
+              </div>
+              <div id="certs-list" class="repeater-list">
+                <!-- Lista de Certificados Dinâmicos -->
+              </div>
+            </div>
+          </div>
+
+          </div>
+        </aside>
+
+        <!-- Live Preview Area (Right) -->
+        <main class="preview-area">
+          <div class="preview-toolbar">
+            <div class="zoom-controls">
+              <button id="btn-zoom-out" class="btn btn-secondary btn-xs" title="Reduzir zoom" aria-label="Reduzir zoom"><i data-lucide="zoom-out"></i></button>
+              <span id="zoom-percent">100%</span>
+              <button id="btn-zoom-in" class="btn btn-secondary btn-xs" title="Aumentar zoom" aria-label="Aumentar zoom"><i data-lucide="zoom-in"></i></button>
+            </div>
+            <span class="preview-page-info"><i data-lucide="file"></i> Pré-visualização A4</span>
+          </div>
+
+          <div class="cv-paper-container">
+            <div id="cv-paper" class="cv-paper template-classic" style="transform: scale(1); transform-origin: top center;">
+              <!-- O conteúdo do currículo será injetado dinamicamente aqui -->
+            </div>
+          </div>
+        </main>
+
+      </div>
+    </div>
+
+    <!-- WORKSPACE: ATS ANALYSIS -->
+    <div id="workspace-ats" class="workspace-pane">
+      <div class="widescreen-content-wrapper">
+        <h2 class="tab-title" style="font-size:1.6rem; margin-bottom:8px;"><i data-lucide="target" class="inline-icon" style="width:24px; height:24px; color:var(--ui-primary);"></i> Análise de Aderência ATS</h2>
+        <p class="tab-description" style="font-size:0.95rem; margin-bottom:24px;">Cole a descrição da vaga que você deseja disputar. Nosso motor analisará seu currículo buscando palavras-chave e adequações essenciais.</p>
+        
+        <div class="form-group">
+          <label for="ats-job-description">Descrição da Vaga de Trabalho</label>
+          <textarea id="ats-job-description" rows="7" placeholder="Cole os requisitos da vaga aqui (ex: tecnologias exigidas, qualificações, etc.)..."></textarea>
+        </div>
+
+        <div class="form-group-checkbox">
+          <input type="checkbox" id="ats-is-gupy" class="pointer">
+          <label for="ats-is-gupy" class="pointer"><i data-lucide="target" class="inline-icon" style="color:var(--ui-warning)"></i> Esta vaga é na plataforma Gupy</label>
+        </div>
+
+        <!-- Gupy Alert Message (hidden by default) -->
+        <div id="gupy-info-box" class="ats-results-box hidden" style="border-color:var(--ui-warning); background-color:rgba(245,158,11,0.02); margin-bottom:16px;">
+          <h5 style="color:var(--ui-warning); display:flex; align-items:center; gap:6px; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;">
+            <i data-lucide="target"></i> Configuração Ativa: Vaga Gupy (IA Gaia)
+          </h5>
+          <p style="font-size:0.82rem; color:var(--ui-text-secondary); line-height:1.45;">
+            A Gupy lê prioritariamente o <strong>texto preenchido nos campos do formulário</strong> do portal, e não apenas o anexo do PDF. Ao finalizar, certifique-se de copiar as seções do CV gerado para os campos correspondentes no site deles para acionar as palavras-chaves de maneira correta.
+          </p>
+        </div>
+
+        <div class="ats-actions-row">
+          <button class="btn btn-secondary" id="btn-analyze-ats">
+            <i data-lucide="bar-chart-2"></i> Analisar Score Local
+          </button>
+          <button class="btn btn-primary btn-ai-action" id="btn-ai-adapt-cv">
+            <i data-lucide="cpu"></i> Adaptar Currículo com IA
+          </button>
+        </div>
+        <p class="help-text" style="text-align: center; margin-top: 8px; font-size: 0.76rem; color: var(--ui-text-muted); display: flex; gap: 4px; align-items: center; justify-content: center;">
+          <i data-lucide="info" class="inline-icon" style="width: 12px; height: 12px; flex-shrink: 0;"></i> A IA possui limites de processamento por minuto estabelecidos na sua chave de API gratuita. Evite cliques repetidos muito rápidos.
+        </p>
+
+        <!-- Analysis Results -->
+        <div id="ats-results-box" class="ats-results-box hidden">
+          <div class="score-circle-wrapper">
+            <div class="score-circle">
+              <span id="ats-score-val">0%</span>
+              <span class="score-label">Score</span>
+            </div>
+            <div class="score-rating">
+              <h4 id="ats-rating-title">Aguardando Análise</h4>
+              <p id="ats-rating-desc">Preencha os campos e a vaga para rodar o score.</p>
+            </div>
+          </div>
+
+          <div class="keyword-status-lists">
+            <div class="kw-box matched">
+              <h5><i data-lucide="check-circle-2"></i> Palavras-chave Encontradas (<span id="count-matched-kw">0</span>)</h5>
+              <div id="list-matched-kw" class="chips-list"></div>
+            </div>
+            <div class="kw-box missing">
+              <h5><i data-lucide="alert-circle"></i> Palavras-chave Ausentes (<span id="count-missing-kw">0</span>)</h5>
+              <div id="list-missing-kw" class="chips-list"></div>
+            </div>
+          </div>
+
+          <div class="ats-tips">
+            <h5>Dicas Rápidas de Otimização:</h5>
+            <ul id="list-ats-tips">
+              <li>Adicione as palavras-chave ausentes na seção de Habilidades ou descreva projetos práticos onde as utilizou.</li>
+              <li>Evite layouts com gráficos ou barras de proficiência que impeçam a leitura do robô.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKSPACE: LINKEDIN ANALYSIS -->
+    <div id="workspace-linkedin" class="workspace-pane">
+      <div class="widescreen-content-wrapper">
+        <h2 class="tab-title" style="font-size:1.6rem; margin-bottom:8px;"><i data-lucide="linkedin" class="inline-icon" style="width:24px; height:24px; color:#0a66c2;"></i> Análise de Perfil LinkedIn</h2>
+        <p class="tab-description" style="font-size:0.95rem; margin-bottom:24px;">Suba capturas de tela (prints) do seu perfil do LinkedIn (como o cabeçalho, seção Sobre ou Experiências). Nossa IA multimodal analisará o conteúdo visual e as informações para sugerir melhorias personalizadas.</p>
+
+        <div class="upload-dropzone" id="linkedin-dropzone">
+          <i data-lucide="image" class="upload-icon animate-pulse"></i>
+          <p>Arraste e solte prints do seu LinkedIn aqui, ou <span>procure imagens</span></p>
+          <span class="file-limits">Formatos aceitos: PNG, JPG (Máx. 3 prints)</span>
+          <input type="file" id="input-linkedin-files" accept="image/*" multiple class="hidden">
+        </div>
+
+        <!-- Previews list -->
+        <div id="linkedin-previews-container" class="linkedin-previews-container hidden" style="margin-top:16px;">
+          <h5 style="font-size:0.85rem; text-transform:uppercase; color:var(--ui-text-secondary); margin-bottom:8px;">Imagens Carregadas:</h5>
+          <div id="linkedin-images-list" class="linkedin-images-list" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+        </div>
+
+        <div class="form-group" style="margin-top: 24px;">
+          <button class="btn btn-primary btn-ai-action" id="btn-analyze-linkedin" disabled style="width:100%; padding:14px;">
+            <i data-lucide="sparkles"></i> Analisar LinkedIn com IA
+          </button>
+          <p class="help-text" style="text-align: center; margin-top: 8px; font-size: 0.76rem; color: var(--ui-text-muted); display: flex; gap: 4px; align-items: center; justify-content: center;">
+            <i data-lucide="info" class="inline-icon" style="width: 12px; height: 12px; flex-shrink: 0;"></i> A IA possui limites de processamento por minuto estabelecidos na sua chave de API gratuita. Evite cliques repetidos muito rápidos.
+          </p>
+        </div>
+
+        <!-- LinkedIn Analysis Results -->
+        <div id="linkedin-results-box" class="ats-results-box hidden" style="margin-top:24px;">
+          <h4 style="color:#fff; margin-bottom:16px; display:flex; align-items:center; gap:8px; font-size:1.1rem;">
+            <i data-lucide="award" style="color:var(--ui-success)"></i> Relatório do Perfil LinkedIn
+          </h4>
+          <div id="linkedin-analysis-content" class="ats-tips" style="border:none; padding-top:0;">
+            <!-- Recomendações inseridas via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKSPACE: EXCELLENCE GUIDE -->
+    <div id="workspace-guide" class="workspace-pane">
+      <div class="widescreen-content-wrapper">
+        <h2 class="tab-title" style="font-size:1.6rem; margin-bottom:8px;"><i data-lucide="book-open" class="inline-icon" style="width:24px; height:24px; color:var(--ui-success);"></i> Guia de Excelência Profissional</h2>
+        <p class="tab-description" style="font-size:0.95rem; margin-bottom:24px;">Aprenda a estruturar um currículo de alto impacto e otimize seu processo de candidatura para se destacar em processos seletivos.</p>
+
+        <!-- Gupy Section inside Guide -->
+        <div class="section-group" style="border-top:none; padding-top:0; margin-top:0;">
+          <h3 class="section-group-title" style="color:#fff; display:flex; align-items:center; gap:8px;">
+            <i data-lucide="target" style="color:var(--ui-warning)"></i> Como Vencer o Algoritmo da Gupy
+          </h3>
+          <div class="guide-card-info" style="background-color:rgba(255,255,255,0.02); border:1px solid var(--ui-border); padding:20px; border-radius:var(--radius-md);">
+            <p style="font-size:0.9rem; color:var(--ui-text-secondary); line-height:1.55;">A Gupy utiliza um algoritmo de IA chamado <strong>Gaia</strong>. Para garantir que seu perfil seja bem ranqueado, siga estas regras de ouro:</p>
+            <ul class="guide-list" style="margin-top:12px; font-size:0.85rem; color:var(--ui-text-secondary); padding-left:20px; display:flex; flex-direction:column; gap:10px;">
+              <li><strong>Nunca anexe apenas o PDF:</strong> O robô da Gupy lê principalmente os <em>campos de texto preenchidos no formulário do portal</em>. Copie e cole todo o conteúdo do seu currículo gerado aqui nos respectivos campos da Gupy.</li>
+              <li><strong>Título Exato da Vaga:</strong> O cargo principal do seu currículo deve ser igual ou muito próximo ao título da vaga aberta. Se a vaga é "Desenvolvedor React", use este termo exato, em vez de "Programador Web".</li>
+              <li><strong>Palavras-chave no Resumo e Experiências:</strong> A IA da Gupy cruza as competências exigidas no anúncio da vaga com os seus textos. Insira as habilidades exigidas no seu resumo profissional.</li>
+              <li><strong>Complete Todos os Testes:</strong> Não deixe testes de perfil (Persona) ou lógica para depois. Candidatos que não realizam os testes têm menor pontuação geral no painel do recrutador.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Golden Rules -->
+        <div class="section-group">
+          <h3 class="section-group-title" style="display:flex; align-items:center; gap:8px;"><i data-lucide="shield-check" style="color:var(--ui-success)"></i> Regras de Ouro do Currículo ATS</h3>
+          <div class="guide-grid-info" style="display:grid; grid-template-columns:1fr; gap:16px;">
+            <div class="guide-info-card" style="background-color:rgba(0,0,0,0.2); border:1px solid var(--ui-border); padding:16px; border-radius:var(--radius-sm);">
+              <h5 style="color:#fff; font-size:0.9rem; margin-bottom:6px;">1. Formatação Simples</h5>
+              <p style="font-size:0.82rem; color:var(--ui-text-secondary); line-height:1.45;">Evite usar caixas de texto flutuantes, tabelas complexas ou gráficos. Sistemas ATS antigos não conseguem ler esses blocos e pulam informações importantes.</p>
+            </div>
+            <div class="guide-info-card" style="background-color:rgba(0,0,0,0.2); border:1px solid var(--ui-border); padding:16px; border-radius:var(--radius-sm);">
+              <h5 style="color:#fff; font-size:0.9rem; margin-bottom:6px;">2. Sem Fotos ou Ícones</h5>
+              <p style="font-size:0.82rem; color:var(--ui-text-secondary); line-height:1.45;">A menos que solicitado explicitamente, não insira sua foto no currículo para evitar vieses inconscientes. Evite também ícones ou emojis exagerados no corpo do texto.</p>
+            </div>
+            <div class="guide-info-card" style="background-color:rgba(0,0,0,0.2); border:1px solid var(--ui-border); padding:16px; border-radius:var(--radius-sm);">
+              <h5 style="color:#fff; font-size:0.9rem; margin-bottom:6px;">3. Métricas e Resultados</h5>
+              <p style="font-size:0.82rem; color:var(--ui-text-secondary); line-height:1.45;">Em vez de apenas listar responsabilidades (ex: "responsável por reuniões"), coloque conquistas tangíveis (ex: "liderei 12 reuniões de planejamento trimestral que resultaram em economia de 15%").</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Verbs library -->
+        <div class="section-group">
+          <h3 class="section-group-title" style="display:flex; align-items:center; gap:8px;"><i data-lucide="sparkles" style="color:var(--ui-primary)"></i> Verbos de Ação Sugeridos</h3>
+          <p class="tab-description" style="margin-bottom:12px;">Substitua frases passivas por verbos fortes para demonstrar atitude e resultados.</p>
+          
+          <div class="verbs-tabs" style="display:flex; flex-direction:column; gap:12px;">
+            <div class="verbs-category" style="background-color:rgba(11,15,25,0.4); border:1px solid var(--ui-border); padding:14px; border-radius:var(--radius-sm);">
+              <h6 style="color:var(--ui-primary); font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;">Tecnologia & Engenharia</h6>
+              <p style="font-size:0.85rem; color:var(--ui-text-primary);">Desenvolvi, Arquitetou, Implementou, Otimizou, Integrou, Depurou, Lançou, Automatizou, Modernizou.</p>
+            </div>
+            <div class="verbs-category" style="background-color:rgba(11,15,25,0.4); border:1px solid var(--ui-border); padding:14px; border-radius:var(--radius-sm);">
+              <h6 style="color:var(--ui-success); font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;">Liderança & Gestão</h6>
+              <p style="font-size:0.85rem; color:var(--ui-text-primary);">Liderei, Coordenou, Dirigi, Gerenciou, Promoveu, Estabeleceu, Estruturou, Mentorou, Alinhou.</p>
+            </div>
+            <div class="verbs-category" style="background-color:rgba(11,15,25,0.4); border:1px solid var(--ui-border); padding:14px; border-radius:var(--radius-sm);">
+              <h6 style="color:var(--ui-warning); font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;">Resultados & Vendas</h6>
+              <p style="font-size:0.85rem; color:var(--ui-text-primary);">Aumentou, Reduziu, Economizou, Maximizou, Negociou, Conquistou, Alavancou, Superou, Captou.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Guide Support Card -->
+        <div class="section-group" style="margin-top: 32px;">
+          <div class="guide-card-info" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(10, 15, 30, 0.5) 100%); border: 1px solid rgba(239, 68, 68, 0.2); padding: 20px; border-radius: var(--radius-md); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+            <h4 style="color: #fff; font-size: 1rem; display: flex; align-items: center; gap: 6px; margin: 0; font-weight: 600;">
+              <i data-lucide="heart" style="color: var(--ui-danger); fill: var(--ui-danger); width: 18px; height: 18px;"></i> Gostou do Guia e da Ferramenta?
+            </h4>
+            <p style="font-size: 0.85rem; color: var(--ui-text-secondary); max-width: 550px; line-height: 1.5; margin: 0;">
+              O Meu CV Free foi criado de desenvolvedor para desenvolvedor (e demais profissionais) para ajudar todo mundo a conseguir a vaga dos sonhos sem pagar nada por isso. Se você puder e quiser ajudar a manter o site ativo e incentivar novas melhorias, faça uma doação Pix voluntária!
+            </p>
+            <button id="btn-support-guide" class="btn btn-secondary btn-sm" style="border-color: rgba(239, 68, 68, 0.3); color: var(--ui-danger); background-color: rgba(239, 68, 68, 0.05); font-weight: 600; margin-top: 6px;">
+              <i data-lucide="heart" style="fill: var(--ui-danger); color: var(--ui-danger);"></i> Apoiar este Projeto (Pix)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- MODAL: SETTINGS (GEMINI API CONFIG) -->
+  <div id="modal-settings" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i data-lucide="bot"></i> Configurar Inteligência Artificial</h3>
+        <button class="modal-close btn-close-modal" aria-label="Fechar"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro">Para habilitar os recursos avançados de IA (Melhorar com IA, Adaptar à Vaga e Parser de PDF), configure sua chave de API do Gemini. <strong>Os dados permanecem salvos localmente e de forma 100% gratuita.</strong></p>
+        
+        <div class="form-group">
+          <label for="settings-gemini-key">Chave de API do Gemini (Google AI)</label>
+          <input type="password" id="settings-gemini-key" placeholder="Cole sua API Key (AIzaSy...)">
+          <span class="help-text">Você pode obter uma chave gratuita no <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer">Google AI Studio <i data-lucide="external-link" class="inline-icon"></i></a>.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="settings-gemini-model">Modelo de IA</label>
+          <select id="settings-gemini-model">
+            <option value="gemini-2.5-flash">Gemini 2.5 Flash (Rápido e Eficiente - Padrão)</option>
+            <option value="gemini-2.5-pro">Gemini 2.5 Pro (Mais Inteligente para Textos Complexos)</option>
+          </select>
+        </div>
+
+        <div class="settings-status-box">
+          <span id="gemini-key-status" class="status-badge status-missing"><i data-lucide="x-circle"></i> Chave ausente</span>
+        </div>
+
+        <div class="settings-warning-box" style="margin-top: 16px; padding: 10px 12px; background-color: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.15); border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--ui-text-secondary); display: flex; gap: 8px; align-items: flex-start; line-height: 1.45;">
+          <i data-lucide="alert-triangle" style="width: 16px; height: 16px; flex-shrink: 0; color: #f59e0b; margin-top: 1px;"></i>
+          <span><strong>Nota sobre limites de cota:</strong> A chave de API gratuita do Gemini possui limites de requisições por minuto (RPM) e limites de tokens de processamento por minuto estabelecidos pelo Google AI Studio. Em caso de erros de limite excedido (código 429), aguarde 1 minuto antes de tentar novamente.</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-test-gemini-key" class="btn btn-secondary"><i data-lucide="check-square"></i> Testar Chave</button>
+        <button id="btn-save-settings" class="btn btn-primary"><i data-lucide="save"></i> Salvar Configurações</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CV LIBRARY (SAVED CVS) -->
+  <div id="modal-cv-list" class="modal-overlay hidden">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3><i data-lucide="folder"></i> Biblioteca de Currículos</h3>
+        <button class="modal-close btn-close-modal" aria-label="Fechar"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="library-toolbar">
+          <button id="btn-library-new" class="btn btn-primary btn-sm"><i data-lucide="plus"></i> Novo Currículo</button>
+          <div class="backup-actions">
+            <button id="btn-export-backup" class="btn btn-secondary btn-sm" title="Baixar todos os currículos em um arquivo JSON"><i data-lucide="download-cloud"></i> Fazer Backup</button>
+            <label for="input-import-backup" class="btn btn-secondary btn-sm pointer" title="Importar arquivo de backup JSON"><i data-lucide="upload-cloud"></i> Restaurar Backup</label>
+            <input type="file" id="input-import-backup" accept=".json" class="hidden">
+          </div>
+        </div>
+
+        <div class="cv-cards-grid" id="cv-library-grid">
+          <!-- Cards de currículos salvos serão renderizados aqui -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: IMPORT PDF -->
+  <div id="modal-import-pdf" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i data-lucide="file-up"></i> Importar Currículo Existente</h3>
+        <button class="modal-close btn-close-modal" aria-label="Fechar"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-intro">Envie seu currículo antigo em PDF. Vamos extrair o texto dele e, caso possua a Chave do Gemini configurada, nossa IA organizará as informações nas seções corretas.</p>
+        
+        <div class="upload-dropzone" id="pdf-dropzone">
+          <i data-lucide="file-text" class="upload-icon animate-pulse"></i>
+          <p>Arraste e solte o seu PDF de currículo aqui, ou <span>procure no computador</span></p>
+          <span class="file-limits">Apenas arquivos .pdf</span>
+          <input type="file" id="input-pdf-file" accept=".pdf" class="hidden">
+        </div>
+
+        <div id="import-pdf-progress" class="import-progress hidden">
+          <div class="spinner"></div>
+          <span id="import-progress-status">Lendo o arquivo PDF...</span>
+        </div>
+
+        <div id="import-alternative-text" class="hidden form-group">
+          <label for="raw-cv-text">Ou cole o texto do currículo antigo manualmente:</label>
+          <textarea id="raw-cv-text" rows="6" placeholder="Cole as informações do seu currículo aqui..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-cancel-import" class="btn btn-secondary btn-close-modal">Cancelar</button>
+        <button id="btn-process-import" class="btn btn-primary" disabled><i data-lucide="sparkles"></i> Processar e Preencher</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: BEFORE vs AFTER COMPARISON -->
+  <div id="modal-diff" class="modal-overlay hidden">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <h3><i data-lucide="git-compare"></i> Comparação de Melhorias por IA</h3>
+        <button class="modal-close btn-close-modal" aria-label="Fechar"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <p class="modal-intro" style="margin-bottom:0;">Veja abaixo as melhorias propostas pela nossa IA de recrutamento. Analise as mudanças de forma pedagógica para aprender a estruturar seu currículo com excelência.</p>
+        
+        <div class="diff-container" style="display:flex; gap:16px; flex:1; min-height:250px;">
+          <div class="diff-pane" style="flex:1; display:flex; flex-direction:column; border:1px solid var(--ui-border); border-radius:var(--radius-md); overflow:hidden;">
+            <h4 class="diff-pane-title original" style="background-color:rgba(239,68,68,0.1); color:var(--ui-danger); font-size:0.8rem; text-transform:uppercase; padding:8px 12px; border-bottom:1px solid var(--ui-border); display:flex; align-items:center; gap:6px;"><i data-lucide="x-circle"></i> Conteúdo Original</h4>
+            <div id="diff-original-content" class="diff-pane-body" style="padding:12px; font-size:0.85rem; overflow-y:auto; flex:1; background-color:rgba(0,0,0,0.1); white-space:pre-wrap; color:var(--ui-text-secondary);"></div>
+          </div>
+          <div class="diff-pane" style="flex:1; display:flex; flex-direction:column; border:1px solid var(--ui-border); border-radius:var(--radius-md); overflow:hidden;">
+            <h4 class="diff-pane-title optimized" style="background-color:rgba(16,185,129,0.1); color:var(--ui-success); font-size:0.8rem; text-transform:uppercase; padding:8px 12px; border-bottom:1px solid var(--ui-border); display:flex; align-items:center; gap:6px;"><i data-lucide="check-circle"></i> Conteúdo Otimizado</h4>
+            <div id="diff-optimized-content" class="diff-pane-body" style="padding:12px; font-size:0.85rem; overflow-y:auto; flex:1; background-color:rgba(0,0,0,0.1); white-space:pre-wrap; color:var(--ui-text-primary);"></div>
+          </div>
+        </div>
+
+        <div class="diff-report-card" style="background-color:var(--ui-surface-light); border:1px solid var(--ui-border); padding:16px; border-radius:var(--radius-md);">
+          <h5 style="color:#fff; font-size:0.85rem; margin-bottom:6px; display:flex; align-items:center; gap:6px;"><i data-lucide="info"></i> O que mudou e por quê? (Orientação Pedagógica)</h5>
+          <div id="diff-explanation" style="font-size:0.8rem; color:var(--ui-text-secondary); line-height:1.45;">
+            <p>Carregando explicação técnica...</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-discard-diff" class="btn btn-secondary"><i data-lucide="trash-2"></i> Descartar Sugestões</button>
+        <button id="btn-apply-diff" class="btn btn-primary"><i data-lucide="check"></i> Aplicar e Salvar no CV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SUPPORT (DONATION) -->
+  <div id="modal-support" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3><i data-lucide="heart" style="color: var(--ui-danger); fill: var(--ui-danger);"></i> Apoiar o Desenvolvedor</h3>
+        <button class="modal-close btn-close-modal" aria-label="Fechar"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body text-center" style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px 16px;">
+        <p class="modal-intro" style="text-align: center; margin: 0; font-size: 0.9rem; line-height: 1.5;">
+          O <strong>Meu CV Free</strong> é 100% gratuito, sem anúncios e sem limites. Se esta ferramenta te ajudou a estruturar seu currículo ou a conseguir uma vaga, considere fazer uma contribuição voluntária de qualquer valor para apoiar a manutenção do projeto e o desenvolvimento de novos recursos!
+        </p>
+        
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 8px 0; background: rgba(0,0,0,0.2); padding: 16px; border: 1px dashed var(--ui-border); border-radius: var(--radius-md);">
+          <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--ui-text-secondary); font-weight: 600; letter-spacing: 0.05em;">Chave PIX (E-mail)</span>
+          <span id="pix-key-text" style="font-family: monospace; font-size: 0.95rem; color: #fff; background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--ui-border); user-select: all; width: 100%; text-align: center;">germanorcarmo@gmail.com</span>
+          <button id="btn-copy-pix" class="btn btn-secondary btn-sm" style="width: 100%;"><i data-lucide="copy"></i> Copiar Chave Pix</button>
+        </div>
+        
+        <p style="font-size: 0.76rem; color: var(--ui-text-muted); text-align: center; line-height: 1.4; margin: 0;">
+          Qualquer contribuição (seja R$ 2, R$ 5, R$ 10 ou mais) ajuda diretamente a custear a hospedagem e incentiva a melhoria contínua do projeto. Muito obrigado! ❤️
+        </p>
+      </div>
+      <div class="modal-footer" style="padding-top: 12px;">
+        <button class="btn btn-primary btn-close-modal" style="width: 100%;">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications (Notificações Flutuantes) -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Script principal -->
+  <script src="app.js"></script>
+</body>
+</html>

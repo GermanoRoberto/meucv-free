@@ -1,0 +1,14 @@
+# Ignorar arquivos-fonte originais na raiz para seguranca e privacidade
+/app.js
+/index.html
+/style.css
+/build.py
+/build.js
+/package.json
+/package-lock.json
+/node_modules/
+/dist/
+.agents
+task.md
+implementation_plan.md
+walkthrough.md
