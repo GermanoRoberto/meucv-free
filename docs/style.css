@@ -543,10 +543,27 @@ a:hover {
 }
 
 /* ================= WORKSPACE CONTAINER & TABS ================= */
+.workspace-pane {
+  display: none !important;
+}
+.workspace-pane.active {
+  display: flex !important;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
+}
+#workspace-editor.workspace-pane.active {
+  display: flex !important;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .workspace-container {
   display: flex;
   flex: 1;
   overflow: hidden;
+  height: 100%;
 }
 
 /* Left Editor Sidebar */
@@ -1465,7 +1482,10 @@ a:hover {
   .preview-toolbar,
   .modal-overlay,
   .toast-container,
-  .zoom-controls {
+  .zoom-controls,
+  #workspace-ats,
+  #workspace-linkedin,
+  #workspace-guide {
     display: none !important;
   }
 
@@ -1476,9 +1496,16 @@ a:hover {
     overflow: visible !important;
   }
 
+  /* Garantir que apenas o painel do currículo esteja visível e se expanda na impressão */
+  #workspace-editor.workspace-pane {
+    display: block !important;
+    overflow: visible !important;
+  }
+
   .workspace-container {
     display: block !important;
     overflow: visible !important;
+    height: auto !important;
   }
 
   .preview-area {
@@ -1573,9 +1600,14 @@ a:hover {
 
 /* Para tablets e telas de toque (max-width: 992px) */
 @media (max-width: 992px) {
+  #workspace-editor.workspace-pane.active {
+    overflow: visible !important;
+    height: auto !important;
+  }
   .workspace-container {
     flex-direction: column;
     overflow-y: auto;
+    height: auto !important;
   }
   .editor-sidebar {
     width: 100% !important;
