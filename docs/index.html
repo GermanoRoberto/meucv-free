@@ -210,6 +210,17 @@
       <!-- Editor Sidebar (Left) -->
       <aside class="editor-sidebar">
         
+        <!-- LinkedIn Warning Alert Banner -->
+        <div id="linkedin-import-alert" class="hidden" style="background-color: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); padding: 12px; border-radius: var(--radius-sm); margin: 16px; font-size: 0.8rem; line-height: 1.45; color: var(--ui-text-primary);">
+          <div style="display: flex; gap: 8px; align-items: flex-start;">
+            <i data-lucide="info" style="color: #38bdf8; width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px;"></i>
+            <div>
+              <strong style="color: #38bdf8;">Importado do LinkedIn!</strong>
+              <p style="margin-top: 4px; color: var(--ui-text-secondary);">O LinkedIn não exporta datas ou descrições para algumas seções (como Certificados). Por favor, revise as datas com <strong>(N/A)</strong> nas abas ao lado para garantir um currículo completo.</p>
+            </div>
+          </div>
+        </div>
+        
         <!-- Tab Navigation -->
         <div class="editor-tabs">
           <button class="tab-btn active" data-tab="tab-personal"><i data-lucide="user"></i><span>Contato</span></button>
