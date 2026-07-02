@@ -1129,7 +1129,7 @@ a:hover {
 
 .cv-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
 
@@ -1167,13 +1167,23 @@ a:hover {
 
 .cv-lib-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   margin-top: 16px;
   border-top: 1px solid rgba(255,255,255,0.05);
   padding-top: 10px;
 }
-.cv-lib-actions button {
+.cv-lib-actions .btn-load {
   flex: 1;
+}
+.cv-lib-actions .btn-dup,
+.cv-lib-actions .btn-del {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Toast Notifications */
