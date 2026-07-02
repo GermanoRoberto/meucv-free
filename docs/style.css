@@ -1112,7 +1112,7 @@ a:hover {
 
 .cv-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
 }
 
@@ -1126,7 +1126,6 @@ a:hover {
   justify-content: space-between;
   min-height: 120px;
   transition: var(--transition);
-  box-sizing: border-box;
 }
 .cv-lib-card:hover {
   border-color: var(--ui-primary);
@@ -1155,29 +1154,9 @@ a:hover {
   margin-top: 16px;
   border-top: 1px solid rgba(255,255,255,0.05);
   padding-top: 10px;
-  width: 100%;
-  box-sizing: border-box;
 }
-.cv-lib-actions .btn {
-  font-size: 0.8rem;
-  padding: 6px 10px;
-  height: 32px;
-  box-sizing: border-box;
-}
-.cv-lib-actions .btn-load {
+.cv-lib-actions button {
   flex: 1;
-  text-align: center;
-  justify-content: center;
-}
-.cv-lib-actions .btn-dup,
-.cv-lib-actions .btn-del {
-  flex: 0 0 32px;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /* Toast Notifications */
@@ -1466,244 +1445,6 @@ a:hover {
   color: var(--ui-success);
 }
 
-/* ================= TOP LEVEL WORKSPACES & NAVIGATION ================= */
-.app-nav-tabs {
-  display: flex;
-  background-color: rgba(11, 15, 25, 0.5);
-  border: 1px solid var(--ui-border);
-  border-radius: var(--radius-md);
-  padding: 4px;
-  gap: 4px;
-  margin: 0 20px;
-}
-
-.nav-tab {
-  background: transparent;
-  border: none;
-  color: var(--ui-text-muted);
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-heading);
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: var(--transition);
-}
-
-.nav-tab:hover {
-  color: var(--ui-text-primary);
-  background-color: rgba(255, 255, 255, 0.03);
-}
-
-.nav-tab.active {
-  color: var(--ui-primary);
-  background-color: var(--ui-primary-light);
-}
-
-/* Widescreen container for dedicated analysis panes */
-.workspace-pane {
-  display: none;
-  flex: 1;
-  overflow: hidden;
-  height: calc(100vh - 72px); /* subtract header height */
-  animation: fadeIn 0.25s ease-out;
-}
-
-.workspace-pane.active {
-  display: flex;
-  flex-direction: column;
-}
-
-.widescreen-content-wrapper {
-  max-width: 900px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 40px 24px;
-  overflow-y: auto;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-/* Scrollbar customization for widescreen view */
-.widescreen-content-wrapper::-webkit-scrollbar {
-  width: 6px;
-}
-.widescreen-content-wrapper::-webkit-scrollbar-thumb {
-  background: var(--ui-border);
-  border-radius: 3px;
-}
-
-/* Quick fixes for forms within widescreen ATS */
-#workspace-ats textarea, #workspace-linkedin textarea {
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-/* Responsividade Mobile e Tablets */
-@media (max-width: 992px) {
-  .editor-header {
-    flex-direction: column;
-    height: auto;
-    padding: 16px;
-    gap: 16px;
-    align-items: stretch;
-  }
-  .header-actions {
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .app-nav-tabs {
-    margin: 0;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    width: 100%;
-  }
-  .nav-tab {
-    flex: 0 0 auto;
-  }
-  .workspace-pane {
-    height: auto;
-    overflow: visible;
-  }
-  .workspace-container {
-    flex-direction: column;
-    height: auto;
-    overflow: visible;
-  }
-  .editor-sidebar {
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-    border-right: none;
-    border-bottom: 1px solid var(--ui-border);
-  }
-  .preview-area {
-    width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
-    padding: 24px 16px;
-  }
-  .cv-paper-container {
-    padding: 10px 0;
-    overflow-x: auto;
-  }
-  .cv-paper {
-    transform: scale(0.8) !important;
-    transform-origin: top center !important;
-  }
-}
-
-/* Estilização para o Relatório de IA (LinkedIn e Explicações ATS) */
-#linkedin-analysis-content, #diff-explanation {
-  font-size: 0.95rem;
-  line-height: 1.65;
-  color: var(--ui-text-primary);
-}
-
-#linkedin-analysis-content p, #diff-explanation p {
-  margin-bottom: 14px;
-}
-
-#linkedin-analysis-content h5.analysis-section-title, #diff-explanation h5.analysis-section-title {
-  font-family: var(--font-heading);
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #fff;
-  margin-top: 28px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid var(--ui-border-light);
-  padding-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#linkedin-analysis-content h5.analysis-section-title .section-num, #diff-explanation h5.analysis-section-title .section-num {
-  background-color: var(--ui-primary);
-  color: #fff;
-  font-size: 0.8rem;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-}
-
-#linkedin-analysis-content ul.analysis-list, #diff-explanation ul.analysis-list {
-  margin-left: 20px;
-  margin-bottom: 18px;
-  list-style-type: disc;
-}
-
-#linkedin-analysis-content li, #diff-explanation li {
-  margin-bottom: 8px;
-  padding-left: 4px;
-}
-
-#linkedin-analysis-content strong, #diff-explanation strong {
-  color: #fff;
-  font-weight: 600;
-}
-
-#linkedin-analysis-content em, #diff-explanation em {
-  font-style: italic;
-  color: var(--ui-text-secondary);
-}
-
-#linkedin-analysis-content code, #diff-explanation code {
-  background-color: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--ui-border-light);
-  border-radius: var(--radius-sm);
-  padding: 3px 8px;
-  font-family: var(--font-sans);
-  font-size: 0.92rem;
-  color: var(--ui-primary-light);
-  word-break: break-word;
-  display: inline-block;
-  margin: 4px 0;
-  max-width: 100%;
-}
-
-/* Card especial para sugestões de blocos grandes como seção 'Sobre' */
-.analysis-quote-card {
-  background-color: rgba(255, 255, 255, 0.03);
-  border-left: 4px solid var(--ui-primary);
-  border-radius: var(--radius-md);
-  padding: 16px 20px;
-  margin: 18px 0;
-  color: var(--ui-text-primary);
-  font-size: 0.93rem;
-  line-height: 1.6;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
-  border-right: 1px solid rgba(255, 255, 255, 0.03);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.analysis-quote-card p {
-  margin-bottom: 8px !important;
-}
-
-.analysis-quote-card p:last-child {
-  margin-bottom: 0 !important;
-}
-
-/* Parágrafos de destaque de introdução de sugestões */
-.highlight-intro-text {
-  font-weight: 600;
-  color: var(--ui-accent-light);
-  margin-top: 18px;
-  font-size: 0.95rem;
-}
 
 /* ================= ================= ================= */
 /* ================= PRINT STYLES (@media print) ================= */
@@ -1724,10 +1465,7 @@ a:hover {
   .preview-toolbar,
   .modal-overlay,
   .toast-container,
-  .zoom-controls,
-  #workspace-ats,
-  #workspace-linkedin,
-  #workspace-guide {
+  .zoom-controls {
     display: none !important;
   }
 
@@ -1774,16 +1512,29 @@ a:hover {
     transform: scale(1) !important;
     transform-origin: top left !important;
     margin: 0 !important;
-    page-break-after: always;
     box-sizing: border-box !important;
   }
 
   /* Evitar quebras de página impróprias */
   .cv-section {
     page-break-inside: avoid;
+    break-inside: avoid;
   }
   
   .cv-item {
     page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Evitar que um bullet ou parágrafo longo seja cortado ao meio;
+     se não couber, o navegador empurra o bloco inteiro pra próxima página
+     em vez de partir o texto na metade. */
+  .cv-item-desc li,
+  .cv-item-desc p,
+  .cv-summary-text p {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    orphans: 3;
+    widows: 3;
   }
 }

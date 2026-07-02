@@ -33,7 +33,7 @@ module.exports = async (req, res) => {
 
       const idToken = authHeader.split(' ')[1];
       
-      // Validar o token de identidade diretamente com o endpoint de verificação do Google
+      // Validar o token de identidade diretamente com o de verificação do Google
       const verifyResponse = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
       if (!verifyResponse.ok) {
         return res.status(401).json({ 
@@ -42,8 +42,6 @@ module.exports = async (req, res) => {
       }
 
       const tokenInfo = await verifyResponse.json();
-      
-      // Opcional: registrar logs de uso por e-mail para auditoria de segurança e prevenção de abusos
       console.log(`[Segurança] Requisição de IA feita pelo e-mail: ${tokenInfo.email}`);
     }
 

@@ -15,6 +15,9 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   
+  <!-- Google Sign-In SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
   <!-- PDF.js para extração de texto local -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
@@ -41,6 +44,7 @@
           <button id="btn-open-settings-nav" class="btn btn-icon-only" title="Configurações de IA">
             <i data-lucide="bot"></i>
           </button>
+          <div id="google-auth-container-nav" class="google-auth-wrapper"></div>
         </div>
       </div>
     </nav>
@@ -130,7 +134,7 @@
       <nav class="app-nav-tabs">
         <button class="nav-tab active" data-workspace="workspace-editor"><i data-lucide="edit-3"></i><span>Currículo</span></button>
         <button class="nav-tab" data-workspace="workspace-ats"><i data-lucide="target"></i><span>Otimizador ATS</span></button>
-        <button class="nav-tab" data-workspace="workspace-linkedin"><i data-lucide="linkedin"></i><span>LinkedIn</span></button>
+        <button class="nav-tab" data-workspace="workspace-linkedin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-icon-svg" style="width: 18px; height: 18px; display: inline-block; vertical-align: middle; margin-right: 6px;"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg><span>LinkedIn</span></button>
         <button class="nav-tab" data-workspace="workspace-guide"><i data-lucide="book-open"></i><span>Guia de Excelência</span></button>
       </nav>
       
@@ -152,6 +156,7 @@
         <button id="btn-open-cv-list" class="btn btn-secondary btn-icon" title="Ver meus currículos salvos">
           <i data-lucide="folder"></i> <span>Biblioteca</span>
         </button>
+        <div id="google-auth-container-editor" class="google-auth-wrapper"></div>
         <button id="btn-export-pdf" class="btn btn-primary btn-icon">
           <i data-lucide="download"></i> <span>Exportar PDF</span>
         </button>
@@ -399,7 +404,7 @@
     <!-- WORKSPACE: LINKEDIN ANALYSIS -->
     <div id="workspace-linkedin" class="workspace-pane">
       <div class="widescreen-content-wrapper">
-        <h2 class="tab-title" style="font-size:1.6rem; margin-bottom:8px;"><i data-lucide="linkedin" class="inline-icon" style="width:24px; height:24px; color:#0a66c2;"></i> Análise de Perfil LinkedIn</h2>
+        <h2 class="tab-title" style="font-size:1.6rem; margin-bottom:8px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0a66c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; display: inline-block; vertical-align: middle; margin-right: 8px;"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg> Análise de Perfil LinkedIn</h2>
         <p class="tab-description" style="font-size:0.95rem; margin-bottom:24px;">Suba capturas de tela (prints) do seu perfil do LinkedIn (como o cabeçalho, seção Sobre ou Experiências). Nossa IA multimodal analisará o conteúdo visual e as informações para sugerir melhorias personalizadas.</p>
 
         <div class="upload-dropzone" id="linkedin-dropzone">
