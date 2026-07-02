@@ -42,7 +42,12 @@ module.exports = async (req, res) => {
       }
 
       const tokenInfo = await verifyResponse.json();
-      console.log(`[Segurança] Requisição de IA feita pelo e-mail: ${tokenInfo.email}`);
+      if (tokenInfo.aud !== process.env.GOOGLE_CLIENT_ID) {
+        return res.status(401).json({ 
+          error: { message: 'Acesso negado. O token de login não pertence a este aplicativo.' } 
+        });
+      }
+      console.log(`[Segurança] Requisição de IA autenticada com sucesso pelo Google.`);
     }
 
     // Montar URL oficial do Gemini
