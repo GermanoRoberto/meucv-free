@@ -1588,17 +1588,17 @@ a:hover {
     display: block !important;
   }
 
-  /* Configurar tamanho físico do papel A4 */
+  /* Configurar tamanho físico do papel A4 e margens reais */
   @page {
     size: A4 portrait;
-    margin: 0; /* Controlamos as margens internas diretamente no CSS do currículo */
+    margin: 15mm 20mm 15mm 20mm; /* Margens físicas padrão do Word (1,5cm topo/base, 2cm laterais) */
   }
 
   .cv-paper {
-    width: 210mm !important;
-    min-height: 297mm !important;
+    width: 100% !important;
+    min-height: 0 !important;
     height: auto !important;
-    padding: 15mm !important; /* Margem de impressão recomendada */
+    padding: 0 !important; /* Margem controlada pelo @page */
     box-shadow: none !important;
     transform: scale(1) !important;
     transform-origin: top left !important;
@@ -1606,22 +1606,19 @@ a:hover {
     box-sizing: border-box !important;
   }
 
-  /* Evitar quebras de página impróprias apenas em itens individuais */
+  /* Permitir quebras de página naturais em itens e parágrafos */
   .cv-item {
-    page-break-inside: avoid;
-    break-inside: avoid;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
   }
 
-  /* Evitar que um bullet ou parágrafo longo seja cortado ao meio;
-     se não couber, o navegador empurra o bloco inteiro pra próxima página
-     em vez de partir o texto na metade. */
   .cv-item-desc li,
   .cv-item-desc p,
   .cv-summary-text p {
-    page-break-inside: avoid;
-    break-inside: avoid;
-    orphans: 3;
-    widows: 3;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    orphans: 2;
+    widows: 2;
   }
 }
 
