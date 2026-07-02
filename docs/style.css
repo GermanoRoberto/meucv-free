@@ -1538,3 +1538,141 @@ a:hover {
     widows: 3;
   }
 }
+
+/* ========================================================================= */
+/* ================= RESPONSIVE MEDIA QUERIES (AUTO AJUSTE) ================ */
+/* ========================================================================= */
+
+/* Para telas médias e laptops pequenos (max-width: 1200px) */
+@media (max-width: 1200px) {
+  .editor-header {
+    height: auto;
+    padding: 8px 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .header-actions .btn span {
+    display: none; /* Oculta o texto dos botões secundários para poupar espaço, mantendo os ícones */
+  }
+  .header-actions .btn-primary span {
+    display: inline; /* Mantém o texto do botão de exportação que é o principal */
+  }
+  .app-nav-tabs {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    border-top: 1px solid var(--ui-border);
+    padding-top: 8px;
+    margin-top: 4px;
+  }
+}
+
+/* Para tablets e telas de toque (max-width: 992px) */
+@media (max-width: 992px) {
+  .workspace-container {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .editor-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 60vh;
+    border-right: none;
+    border-bottom: 1px solid var(--ui-border);
+  }
+  .preview-area {
+    padding: 20px 10px !important;
+    overflow-x: auto;
+  }
+  .cv-paper-container {
+    padding: 0 !important;
+    display: flex;
+    justify-content: center;
+  }
+  .cv-paper {
+    transform: scale(0.85) !important;
+    transform-origin: top center !important;
+    margin: 0 auto 40px auto !important;
+  }
+}
+
+/* Para dispositivos móveis (max-width: 768px) */
+@media (max-width: 768px) {
+  .editor-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .header-left {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .cv-title-area input {
+    width: 100%;
+    max-width: 200px;
+  }
+  .header-actions {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .template-selector {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .template-selector select {
+    flex: 1;
+  }
+  .app-nav-tabs .nav-tab span {
+    display: none; /* Mostra apenas os ícones nas abas superiores */
+  }
+  .app-nav-tabs .nav-tab svg, 
+  .app-nav-tabs .nav-tab i {
+    margin-right: 0 !important;
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Landing page (Hero) */
+  .hero-title {
+    font-size: 2rem !important;
+  }
+  .hero-subtitle {
+    font-size: 0.9rem !important;
+  }
+  .hero-actions {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    padding: 0 16px;
+  }
+  .hero-actions .btn {
+    width: 100%;
+  }
+  
+  /* Navbar da Landing Page */
+  .nav-container {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+  .nav-links {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  /* Modais responsivos */
+  .modal-card {
+    width: 95% !important;
+    margin: 10px !important;
+    max-height: 90vh !important;
+  }
+  
+  .diff-container {
+    flex-direction: column;
+  }
+}
