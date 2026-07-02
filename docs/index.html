@@ -407,38 +407,82 @@
     <!-- WORKSPACE: LINKEDIN ANALYSIS -->
     <div id="workspace-linkedin" class="workspace-pane">
       <div class="widescreen-content-wrapper">
-        <h2 class="tab-title" style="font-size:1.6rem; margin-bottom:8px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0a66c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; display: inline-block; vertical-align: middle; margin-right: 8px;"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg> Análise de Perfil LinkedIn</h2>
-        <p class="tab-description" style="font-size:0.95rem; margin-bottom:24px;">Suba capturas de tela (prints) do seu perfil do LinkedIn (como o cabeçalho, seção Sobre ou Experiências). Nossa IA multimodal analisará o conteúdo visual e as informações para sugerir melhorias personalizadas.</p>
+        <h2 class="tab-title" style="font-size:1.6rem; margin-bottom:8px;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#0a66c2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px; display: inline-block; vertical-align: middle; margin-right: 8px;"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg> Importação e Otimização LinkedIn</h2>
+        <p class="tab-description" style="font-size:0.95rem; margin-bottom:20px;">Use seus dados do LinkedIn para impulsionar seu currículo. Escolha entre a análise visual rápida de capturas de tela ou importe seus arquivos oficiais do LinkedIn (.csv) para preenchimento automático.</p>
 
-        <div class="upload-dropzone" id="linkedin-dropzone">
-          <i data-lucide="image" class="upload-icon animate-pulse"></i>
-          <p>Arraste e solte prints do seu LinkedIn aqui, ou <span>procure imagens</span></p>
-          <span class="file-limits">Formatos aceitos: PNG, JPG (Máx. 3 prints)</span>
-          <input type="file" id="input-linkedin-files" accept="image/*" multiple class="hidden">
+        <!-- LinkedIn Sub-Navigation -->
+        <div class="linkedin-subtabs" style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--ui-border); padding-bottom: 12px;">
+          <button class="btn btn-secondary btn-sm active" id="btn-subtab-linkedin-print" style="flex: 1;">Análise por Imagem (Prints)</button>
+          <button class="btn btn-secondary btn-sm" id="btn-subtab-linkedin-csv" style="flex: 1;">Importar Dados Oficiais (CSV)</button>
         </div>
 
-        <!-- Previews list -->
-        <div id="linkedin-previews-container" class="linkedin-previews-container hidden" style="margin-top:16px;">
-          <h5 style="font-size:0.85rem; text-transform:uppercase; color:var(--ui-text-secondary); margin-bottom:8px;">Imagens Carregadas:</h5>
-          <div id="linkedin-images-list" class="linkedin-images-list" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+        <!-- SECTION 1: PRINT ANALYSIS -->
+        <div id="linkedin-print-section" class="linkedin-tab-pane">
+          <!-- Orientação detalhada de prints (Instruções Claras) -->
+          <div class="linkedin-guidance-box" style="margin-bottom: 16px; padding: 12px; background: rgba(59, 130, 246, 0.03); border: 1px solid var(--ui-border); border-radius: var(--radius-sm); font-size: 0.82rem; line-height: 1.45;">
+            <strong style="color: var(--ui-primary); display: block; margin-bottom: 6px;"><i data-lucide="help-circle"></i> Quais prints tirar do seu LinkedIn para melhor resultado com IA?</strong>
+            <ul style="padding-left: 20px; color: var(--ui-text-secondary); margin: 0; display: flex; flex-direction: column; gap: 4px;">
+              <li><strong>Print 1 (Cabeçalho):</strong> Contendo seu Nome, Cargo atual/Título profissional e Foto.</li>
+              <li><strong>Print 2 (Sobre):</strong> Tire print do texto completo do seu resumo profissional ("Sobre").</li>
+              <li><strong>Print 3 (Experiência):</strong> A descrição dos seus cargos e atividades mais importantes.</li>
+            </ul>
+          </div>
+
+          <div class="upload-dropzone" id="linkedin-dropzone">
+            <i data-lucide="image" class="upload-icon animate-pulse"></i>
+            <p>Arraste e solte prints do seu LinkedIn aqui, ou <span>procure imagens</span></p>
+            <span class="file-limits">Formatos aceitos: PNG, JPG (Máx. 3 prints)</span>
+            <input type="file" id="input-linkedin-files" accept="image/*" multiple class="hidden">
+          </div>
+
+          <!-- Previews list -->
+          <div id="linkedin-previews-container" class="linkedin-previews-container hidden" style="margin-top:16px;">
+            <h5 style="font-size:0.85rem; text-transform:uppercase; color:var(--ui-text-secondary); margin-bottom:8px;">Imagens Carregadas:</h5>
+            <div id="linkedin-images-list" class="linkedin-images-list" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+          </div>
+
+          <div class="form-group" style="margin-top: 24px;">
+            <button class="btn btn-primary btn-ai-action" id="btn-analyze-linkedin" disabled style="width:100%; padding:14px;">
+              <i data-lucide="sparkles"></i> Analisar LinkedIn com IA
+            </button>
+            <p class="help-text" style="text-align: center; margin-top: 8px; font-size: 0.76rem; color: var(--ui-text-muted); display: flex; gap: 4px; align-items: center; justify-content: center;">
+              <i data-lucide="info" class="inline-icon" style="width: 12px; height: 12px; flex-shrink: 0;"></i> A IA possui limites de processamento por minuto estabelecidos na sua chave de API gratuita. Evite cliques repetidos muito rápidos.
+            </p>
+          </div>
+
+          <!-- LinkedIn Analysis Results -->
+          <div id="linkedin-results-box" class="ats-results-box hidden" style="margin-top:24px;">
+            <h4 style="color:#fff; margin-bottom:16px; display:flex; align-items:center; gap:8px; font-size:1.1rem;">
+              <i data-lucide="award" style="color:var(--ui-success)"></i> Relatório do Perfil LinkedIn
+            </h4>
+            <div id="linkedin-analysis-content" class="ats-tips" style="border:none; padding-top:0;">
+              <!-- Recomendações inseridas via JS -->
+            </div>
+          </div>
         </div>
 
-        <div class="form-group" style="margin-top: 24px;">
-          <button class="btn btn-primary btn-ai-action" id="btn-analyze-linkedin" disabled style="width:100%; padding:14px;">
-            <i data-lucide="sparkles"></i> Analisar LinkedIn com IA
-          </button>
-          <p class="help-text" style="text-align: center; margin-top: 8px; font-size: 0.76rem; color: var(--ui-text-muted); display: flex; gap: 4px; align-items: center; justify-content: center;">
-            <i data-lucide="info" class="inline-icon" style="width: 12px; height: 12px; flex-shrink: 0;"></i> A IA possui limites de processamento por minuto estabelecidos na sua chave de API gratuita. Evite cliques repetidos muito rápidos.
-          </p>
-        </div>
+        <!-- SECTION 2: CSV IMPORT -->
+        <div id="linkedin-csv-section" class="linkedin-tab-pane hidden">
+          <div class="linkedin-guidance-box" style="margin-bottom: 16px; padding: 12px; background: rgba(16, 185, 129, 0.03); border: 1px solid var(--ui-border); border-radius: var(--radius-sm); font-size: 0.82rem; line-height: 1.45;">
+            <strong style="color: var(--ui-success); display: block; margin-bottom: 6px;"><i data-lucide="help-circle"></i> Como exportar seus dados oficiais do LinkedIn?</strong>
+            <ul style="padding-left: 20px; color: var(--ui-text-secondary); margin: 0; display: flex; flex-direction: column; gap: 4px;">
+              <li>Acesse o LinkedIn: <strong>Eu → Configurações e privacidade → Privacidade de dados → Obter uma cópia dos seus dados</strong>.</li>
+              <li>Escolha a segunda opção (pacote rápido de arquivos individuais), marque as caixas de <strong>Perfil, Experiências, Educação</strong> e solicite.</li>
+              <li>Extraia o arquivo <code>.zip</code> recebido por e-mail e faça o upload de um ou mais dos arquivos <code>.csv</code> abaixo!</li>
+            </ul>
+          </div>
 
-        <!-- LinkedIn Analysis Results -->
-        <div id="linkedin-results-box" class="ats-results-box hidden" style="margin-top:24px;">
-          <h4 style="color:#fff; margin-bottom:16px; display:flex; align-items:center; gap:8px; font-size:1.1rem;">
-            <i data-lucide="award" style="color:var(--ui-success)"></i> Relatório do Perfil LinkedIn
-          </h4>
-          <div id="linkedin-analysis-content" class="ats-tips" style="border:none; padding-top:0;">
-            <!-- Recomendações inseridas via JS -->
+          <div class="upload-dropzone" id="linkedin-csv-dropzone" style="border-color: var(--ui-success); background: rgba(16, 185, 129, 0.01);">
+            <i data-lucide="file-spreadsheet" class="upload-icon animate-pulse" style="color: var(--ui-success); margin-bottom:10px;"></i>
+            <p>Arraste e solte arquivos CSV do LinkedIn aqui, ou <span>procure arquivos</span></p>
+            <span class="file-limits">Arquivos recomendados: Profile.csv, Positions.csv, Education.csv, Skills.csv</span>
+            <input type="file" id="input-linkedin-csv-files" accept=".csv" multiple class="hidden">
+          </div>
+
+          <!-- List of imported CSV items -->
+          <div id="linkedin-csv-imported-container" class="linkedin-previews-container hidden" style="margin-top:16px; border-color: rgba(16, 185, 129, 0.25);">
+            <h5 style="font-size:0.85rem; text-transform:uppercase; color:var(--ui-success); margin-bottom:8px;">Arquivos Importados:</h5>
+            <ul id="linkedin-csv-imported-list" style="padding-left: 20px; font-size: 0.85rem; color: var(--ui-text-primary); display: flex; flex-direction: column; gap: 6px; list-style-type: none;"></ul>
           </div>
         </div>
       </div>
