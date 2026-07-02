@@ -463,6 +463,19 @@ a:hover {
   flex-direction: column;
   overflow: hidden;
 }
+#editor-workspace.view-active {
+  display: flex !important;
+}
+
+/* Widescreen Content Centering Wrapper */
+.widescreen-content-wrapper {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+}
 
 /* Top Navigation Tabs */
 .app-nav-tabs {
@@ -1593,12 +1606,7 @@ a:hover {
     box-sizing: border-box !important;
   }
 
-  /* Evitar quebras de página impróprias */
-  .cv-section {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-  
+  /* Evitar quebras de página impróprias apenas em itens individuais */
   .cv-item {
     page-break-inside: avoid;
     break-inside: avoid;
