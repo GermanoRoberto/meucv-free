@@ -1606,19 +1606,23 @@ a:hover {
     box-sizing: border-box !important;
   }
 
-  /* Permitir quebras de página naturais em itens e parágrafos */
-  .cv-item {
-    page-break-inside: auto !important;
-    break-inside: auto !important;
+  /* Evitar quebras de página desagradáveis no meio de um item de experiência ou título órfão */
+  .cv-section-title {
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
 
+  .cv-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .cv-contact-row,
+  .cv-summary-text,
   .cv-item-desc li,
-  .cv-item-desc p,
-  .cv-summary-text p {
-    page-break-inside: auto !important;
-    break-inside: auto !important;
-    orphans: 2;
-    widows: 2;
+  .cv-item-desc p {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
 
