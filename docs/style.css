@@ -1588,17 +1588,17 @@ a:hover {
     display: block !important;
   }
 
-  /* Configurar tamanho físico do papel A4 e margens reais */
+  /* Configurar tamanho físico do papel A4 e margens reais (margin 0 desativa cabeçalhos/rodapés automáticos do navegador) */
   @page {
     size: A4 portrait;
-    margin: 15mm 20mm 15mm 20mm; /* Margens físicas padrão do Word (1,5cm topo/base, 2cm laterais) */
+    margin: 0;
   }
 
   .cv-paper {
     width: 100% !important;
     min-height: 0 !important;
     height: auto !important;
-    padding: 0 !important; /* Margem controlada pelo @page */
+    padding: 20mm 20mm !important; /* Margem interna física aplicada diretamente no conteúdo */
     box-shadow: none !important;
     transform: scale(1) !important;
     transform-origin: top left !important;
