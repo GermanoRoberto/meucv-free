@@ -1588,17 +1588,17 @@ a:hover {
     display: block !important;
   }
 
-  /* Configurar tamanho físico do papel A4 e margens reais (margin 0 desativa cabeçalhos/rodapés automáticos do navegador) */
+  /* Configurar tamanho físico do papel A4 e margens reais (gerencia o espaçamento de todas as páginas no PDF) */
   @page {
     size: A4 portrait;
-    margin: 0;
+    margin: 15mm 20mm 15mm 20mm; /* Margens físicas reais aplicadas a cada página */
   }
 
   .cv-paper {
     width: 100% !important;
     min-height: 0 !important;
     height: auto !important;
-    padding: 20mm 20mm !important; /* Margem interna física aplicada diretamente no conteúdo */
+    padding: 0 !important; /* Margem controlada pelo @page */
     box-shadow: none !important;
     transform: scale(1) !important;
     transform-origin: top left !important;
