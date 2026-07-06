@@ -1001,6 +1001,9 @@ a:hover {
   line-height: 1.45;
   box-sizing: border-box;
   text-align: left;
+  /* Linha guia visual de quebra de página A4 (exibida apenas na tela) */
+  background-image: repeating-linear-gradient(to bottom, transparent, transparent 296.6mm, rgba(56, 189, 248, 0.35) 296.6mm, rgba(56, 189, 248, 0.35) 297.4mm);
+  background-size: 100% 297mm;
 }
 
 /* ================= MODAL DIALOGS ================= */
@@ -1604,6 +1607,7 @@ a:hover {
     transform-origin: top left !important;
     margin: 0 !important;
     box-sizing: border-box !important;
+    background-image: none !important; /* Desativa a linha guia visual na impressão */
   }
 
   /* Evitar quebras de página desagradáveis no meio de um item de experiência ou título órfão */
