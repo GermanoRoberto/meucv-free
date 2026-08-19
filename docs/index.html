@@ -636,6 +636,67 @@
               </table>
             </div>
 
+            <!-- Estudo de Caso Simulado: Triagem inHire -->
+            <div style="background-color:rgba(255,255,255,0.02); border:1px solid var(--ui-border); padding:20px; border-radius:var(--radius-md); margin-bottom: 4px;">
+              <h4 style="color:#fff; font-size:0.95rem; margin-top:0; margin-bottom:6px; font-weight: 600; display:flex; align-items:center; gap:8px;">
+                <i data-lucide="clipboard-list" style="color:var(--ui-success); width:18px; height:18px;"></i> Estudo de Caso Simulado: Triagem inHire (Match Estimado: 70% a 75%)
+              </h4>
+              <p style="font-size:0.82rem; color:var(--ui-text-secondary); line-height:1.5; margin-bottom:16px; margin-top: 0;">
+                Exemplo prático de como o algoritmo da inHire analisa semântica e pontua por peso de requisitos (Hard Skills eliminatórias vs. desejáveis) para uma vaga técnica:
+              </p>
+              
+              <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.78rem; line-height: 1.45; color: var(--ui-text-secondary);">
+                  <thead>
+                    <tr style="border-bottom: 2px solid var(--ui-border); color: #fff;">
+                      <th style="padding: 8px 12px; font-weight: 600;">Critério de Triagem inHire</th>
+                      <th style="padding: 8px 12px; font-weight: 600;">Peso / Tipo</th>
+                      <th style="padding: 8px 12px; font-weight: 600;">Leitura do Algoritmo</th>
+                      <th style="padding: 8px 12px; font-weight: 600; text-align: right;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Tempo de Experiência em TI</td>
+                      <td style="padding: 8px 12px;"><span style="color:var(--ui-warning);">Eliminatório</span></td>
+                      <td style="padding: 8px 12px;">4 anos comprovados (exigido: 3 anos).</td>
+                      <td style="padding: 8px 12px; text-align: right; font-weight:600; color:var(--ui-success);">Aprovado (100%)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Fundamentos de Redes</td>
+                      <td style="padding: 8px 12px;">Requisito Forte</td>
+                      <td style="padding: 8px 12px;">TCP/IP, DNS, DHCP, VPN, LAN/WAN e Wireshark indexados.</td>
+                      <td style="padding: 8px 12px; text-align: right; font-weight:600; color:var(--ui-success);">Aprovado (100%)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Ferramentas de Suporte & SLA</td>
+                      <td style="padding: 8px 12px;">Requisito Forte</td>
+                      <td style="padding: 8px 12px;">SSH, TeamViewer, VPN e gestão de chamados presentes.</td>
+                      <td style="padding: 8px 12px; text-align: right; font-weight:600; color:var(--ui-success);">Aprovado (100%)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Scripts & Bancos de Dados</td>
+                      <td style="padding: 8px 12px;"><span style="color:#38bdf8;">Classificatório</span></td>
+                      <td style="padding: 8px 12px;">PostgreSQL, Bash/Shell e automação via Python.</td>
+                      <td style="padding: 8px 12px; text-align: right; font-weight:600; color:var(--ui-success);">Máximo (100%)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Ambiente macOS</td>
+                      <td style="padding: 8px 12px;"><span style="color:var(--ui-warning);">Eliminatório</span></td>
+                      <td style="padding: 8px 12px;">Identificado apenas como "macOS (Terminal Unix)"; ausência dos termos <em>macOS Server</em> e <em>MacStadium</em>.</td>
+                      <td style="padding: 8px 12px; text-align: right; font-weight:600; color:#fb923c;">Parcial (~50%)</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                      <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Proficiência em Inglês</td>
+                      <td style="padding: 8px 12px;">Eliminatório / Classif.</td>
+                      <td style="padding: 8px 12px;">Identificado como "Intermediário" frente ao termo exigido "Avançado/Fluente".</td>
+                      <td style="padding: 8px 12px; text-align: right; font-weight:600; color:#fb923c;">Parcial (~50%)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
             <!-- Diretrizes de Otimização Card -->
             <div class="guide-card-info" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.04) 0%, rgba(10, 15, 30, 0.5) 100%); border: 1px solid rgba(56, 189, 248, 0.2); padding: 18px; border-radius:var(--radius-md);">
               <h4 style="color: #fff; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; font-weight: 600; margin-top: 0; margin-bottom: 10px; color: #38bdf8;">
