@@ -384,9 +384,15 @@
           <textarea id="ats-job-description" rows="7" placeholder="Cole os requisitos da vaga aqui (ex: tecnologias exigidas, qualificações, etc.)..."></textarea>
         </div>
 
-        <div class="form-group-checkbox">
-          <input type="checkbox" id="ats-is-gupy" class="pointer">
-          <label for="ats-is-gupy" class="pointer"><i data-lucide="target" class="inline-icon" style="color:var(--ui-warning)"></i> Esta vaga é na plataforma Gupy</label>
+        <div style="display: flex; gap: 24px; margin-bottom: 16px; flex-wrap: wrap;">
+          <div class="form-group-checkbox" style="margin-bottom: 0;">
+            <input type="checkbox" id="ats-is-gupy" class="pointer">
+            <label for="ats-is-gupy" class="pointer"><i data-lucide="target" class="inline-icon" style="color:var(--ui-warning)"></i> Esta vaga é na plataforma Gupy</label>
+          </div>
+          <div class="form-group-checkbox" style="margin-bottom: 0;">
+            <input type="checkbox" id="ats-is-inhire" class="pointer">
+            <label for="ats-is-inhire" class="pointer"><i data-lucide="layers" class="inline-icon" style="color:var(--ui-success)"></i> Esta vaga é na plataforma inHire</label>
+          </div>
         </div>
 
         <!-- Gupy Alert Message (hidden by default) -->
@@ -396,6 +402,16 @@
           </h5>
           <p style="font-size:0.82rem; color:var(--ui-text-secondary); line-height:1.45;">
             A Gupy lê prioritariamente o <strong>texto preenchido nos campos do formulário</strong> do portal, e não apenas o anexo do PDF. Ao finalizar, certifique-se de copiar as seções do CV gerado para os campos correspondentes no site deles para acionar as palavras-chaves de maneira correta.
+          </p>
+        </div>
+
+        <!-- inHire Alert Message (hidden by default) -->
+        <div id="inhire-info-box" class="ats-results-box hidden" style="border-color:var(--ui-success); background-color:rgba(16,185,129,0.02); margin-bottom:16px;">
+          <h5 style="color:var(--ui-success); display:flex; align-items:center; gap:6px; font-size:0.85rem; text-transform:uppercase; margin-bottom:6px;">
+            <i data-lucide="layers"></i> Configuração Ativa: Vaga inHire (Ponderação Técnica)
+          </h5>
+          <p style="font-size:0.82rem; color:var(--ui-text-secondary); line-height:1.45;">
+            A inHire prioriza a <strong>leitura direta do arquivo PDF anexado (Parsing)</strong> e pontua seu currículo com base no peso de competências Obrigatórias e Desejáveis. Baixe o PDF final gerado por este otimizador e anexe-o exatamente como gerado.
           </p>
         </div>
 
