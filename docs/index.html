@@ -536,19 +536,103 @@
         <h2 class="tab-title" style="font-size:1.6rem; margin-bottom:8px;"><i data-lucide="book-open" class="inline-icon" style="width:24px; height:24px; color:var(--ui-success);"></i> Guia de Excelência Profissional</h2>
         <p class="tab-description" style="font-size:0.95rem; margin-bottom:24px;">Aprenda a estruturar um currículo de alto impacto e otimize seu processo de candidatura para se destacar em processos seletivos.</p>
 
-        <!-- Gupy Section inside Guide -->
+        <!-- Gupy & inHire Comparison Section inside Guide -->
         <div class="section-group" style="border-top:none; padding-top:0; margin-top:0;">
           <h3 class="section-group-title" style="color:#fff; display:flex; align-items:center; gap:8px;">
-            <i data-lucide="target" style="color:var(--ui-warning)"></i> Como Vencer o Algoritmo da Gupy
+            <i data-lucide="target" style="color:var(--ui-warning)"></i> Comparativo de Algoritmos ATS: Gupy (Gaia) vs. inHire
           </h3>
-          <div class="guide-card-info" style="background-color:rgba(255,255,255,0.02); border:1px solid var(--ui-border); padding:20px; border-radius:var(--radius-md);">
-            <p style="font-size:0.9rem; color:var(--ui-text-secondary); line-height:1.55;">A Gupy utiliza um algoritmo de IA chamado <strong>Gaia</strong>. Para garantir que seu perfil seja bem ranqueado, siga estas regras de ouro:</p>
-            <ul class="guide-list" style="margin-top:12px; font-size:0.85rem; color:var(--ui-text-secondary); padding-left:20px; display:flex; flex-direction:column; gap:10px;">
-              <li><strong>Nunca anexe apenas o PDF:</strong> O robô da Gupy lê principalmente os <em>campos de texto preenchidos no formulário do portal</em>. Copie e cole todo o conteúdo do seu currículo gerado aqui nos respectivos campos da Gupy.</li>
-              <li><strong>Título Exato da Vaga:</strong> O cargo principal do seu currículo deve ser igual ou muito próximo ao título da vaga aberta. Se a vaga é "Desenvolvedor React", use este termo exato, em vez de "Programador Web".</li>
-              <li><strong>Palavras-chave no Resumo e Experiências:</strong> A IA da Gupy cruza as competências exigidas no anúncio da vaga com os seus textos. Insira as habilidades exigidas no seu resumo profissional.</li>
-              <li><strong>Complete Todos os Testes:</strong> Não deixe testes de perfil (Persona) ou lógica para depois. Candidatos que não realizam os testes têm menor pontuação geral no painel do recrutador.</li>
-            </ul>
+          <p class="tab-description" style="margin-bottom:16px; font-size:0.88rem; color:var(--ui-text-secondary);">Entenda o funcionamento, critérios de triagem e particularidades dos motores de IA das principais plataformas de recrutamento.</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <div class="guide-grid-info" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px;">
+              <!-- Gupy Gaia Card -->
+              <div class="guide-card-info" style="background-color:rgba(255,255,255,0.02); border:1px solid var(--ui-border); padding:20px; border-radius:var(--radius-md); display: flex; flex-direction: column; gap: 12px;">
+                <h4 style="color: #fff; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; font-weight: 600; margin: 0; color: #38bdf8;">
+                  <i data-lucide="cpu" style="color: #38bdf8; width: 18px; height: 18px;"></i> Gupy (Gaia)
+                </h4>
+                <p style="font-size:0.82rem; color:var(--ui-text-secondary); line-height:1.5; margin:0;">
+                  O motor de triagem da Gupy, denominado <strong>Gaia</strong>, baseia-se prioritariamente em Processamento de Linguagem Natural (PLN), inteligência artificial semântica e pontuação comportamental.
+                </p>
+                <ul style="padding-left: 18px; font-size: 0.8rem; color: var(--ui-text-secondary); margin: 0; display: flex; flex-direction: column; gap: 8px; line-height: 1.45; list-style-type: disc;">
+                  <li><strong>Análise Semântica:</strong> Não depende de match exato. Mapeia contexto, sinônimos, senioridade e tecnologias correlatas.</li>
+                  <li><strong>Match Dinâmico:</strong> Organiza a fila de candidaturas em ordem decrescente de compatibilidade calculada em tempo real.</li>
+                  <li><strong>Dados Estruturados:</strong> Dá prioridade aos campos preenchidos manualmente no portal em relação ao arquivo de currículo bruto.</li>
+                  <li><strong>Filtros e Notas de Corte:</strong> Testes comportamentais, de fit cultural, lógica e idiomas funcionam como nota de corte.</li>
+                </ul>
+              </div>
+
+              <!-- inHire Card -->
+              <div class="guide-card-info" style="background-color:rgba(255,255,255,0.02); border:1px solid var(--ui-border); padding:20px; border-radius:var(--radius-md); display: flex; flex-direction: column; gap: 12px;">
+                <h4 style="color: #fff; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; font-weight: 600; margin: 0; color: var(--ui-success);">
+                  <i data-lucide="layers" style="color: var(--ui-success; width: 18px; height: 18px;"></i> inHire
+                </h4>
+                <p style="font-size:0.82rem; color:var(--ui-text-secondary); line-height:1.5; margin:0;">
+                  A <strong>inHire</strong> adota uma abordagem orientada à automação de regras de negócio, extração direta de documentos e ranqueamento técnico ponderado.
+                </p>
+                <ul style="padding-left: 18px; font-size: 0.8rem; color: var(--ui-text-secondary); margin: 0; display: flex; flex-direction: column; gap: 8px; line-height: 1.45; list-style-type: disc;">
+                  <li><strong>Parsing Direto de PDF:</strong> Extrai e estrutura o texto do arquivo em PDF/DOCX, mapeando palavras-chave e competências.</li>
+                  <li><strong>Ranqueamento por Pesos:</strong> Recrutadores atribuem pesos distintos a competências Obrigatórias (penalizam) e Desejáveis.</li>
+                  <li><strong>Perguntas Eliminatórias:</strong> Validação rígida de requisitos obrigatórios preenchidos na inscrição (local, disponibilidade, etc.).</li>
+                  <li><strong>Faixas de Aderência:</strong> Agrupa candidatos de forma estruturada (Altamente Aderente, Parcialmente, Fora do Perfil).</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Matriz Comparativa (Table) -->
+            <div style="background-color:rgba(255,255,255,0.01); border:1px solid var(--ui-border); padding:16px; border-radius:var(--radius-md); overflow-x: auto;">
+              <h4 style="color:#fff; font-size:0.95rem; margin-top:0; margin-bottom:12px; font-weight: 600;">Matriz Comparativa de Algoritmos</h4>
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.78rem; line-height: 1.45; color: var(--ui-text-secondary);">
+                <thead>
+                  <tr style="border-bottom: 2px solid var(--ui-border); color: #fff;">
+                    <th style="padding: 8px 12px; font-weight: 600;">Dimensão de Avaliação</th>
+                    <th style="padding: 8px 12px; font-weight: 600; color: #38bdf8;">Gupy (Gaia)</th>
+                    <th style="padding: 8px 12px; font-weight: 600; color: var(--ui-success);">inHire</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Núcleo de Processamento</td>
+                    <td style="padding: 8px 12px;">Similaridade semântica contextual e redes neurais</td>
+                    <td style="padding: 8px 12px;">Correspondência de requisitos e regras ponderadas</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Parsing Principal</td>
+                    <td style="padding: 8px 12px;">Dados cadastrados no formulário da plataforma</td>
+                    <td style="padding: 8px 12px;">Texto extraído diretamente do arquivo (PDF/DOCX)</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Tratamento de Sinônimos</td>
+                    <td style="padding: 8px 12px;">Elevado (compreende termos correlatos e contexto)</td>
+                    <td style="padding: 8px 12px;">Médio a Alto (prioriza a presença exata de termos técnicos)</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Filtros de Entrada</td>
+                    <td style="padding: 8px 12px;">Testes de fit, lógica, perfil e questionários</td>
+                    <td style="padding: 8px 12px;">Knockout questions e validação de requisitos mínimos</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 12px; font-weight: 600; color: #fff;">Ordenação de Candidatos</td>
+                    <td style="padding: 8px 12px;">Score percentual dinâmico (visão unificada)</td>
+                    <td style="padding: 8px 12px;">Fila por níveis de aderência e pontuação de competências</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Diretrizes de Otimização Card -->
+            <div class="guide-card-info" style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.04) 0%, rgba(10, 15, 30, 0.5) 100%); border: 1px solid rgba(56, 189, 248, 0.2); padding: 18px; border-radius:var(--radius-md);">
+              <h4 style="color: #fff; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; font-weight: 600; margin-top: 0; margin-bottom: 10px; color: #38bdf8;">
+                <i data-lucide="check-circle" style="color: #38bdf8; width: 18px; height: 18px;"></i> Diretrizes para Otimização em Ambos os Sistemas
+              </h4>
+              <ul style="padding-left: 18px; font-size: 0.8rem; color: var(--ui-text-secondary); margin: 0; display: flex; flex-direction: column; gap: 8px; line-height: 1.45; list-style-type: disc;">
+                <li><strong>Padronização de Terminologia:</strong> Inclua os termos técnicos, nomenclaturas de ferramentas e protocolos exatamente como constam nos requisitos da vaga (ex.: <em>TCP/IP, PostgreSQL, Bash/Shell, SLA, Zabbix</em>).</li>
+                <li><strong>Estrutura de Arquivo Limpa:</strong> Utilize PDFs de camada única de texto (pesquisáveis), evitando colunas duplas complexas, tabelas aninhadas, gráficos, caixas de texto ou imagens incorporadas que prejudicam o parser.</li>
+                <li><strong>Contextualização de Experiências:</strong> Descreva as responsabilidades profissionais associando ferramentas específicas a resultados e métricas alcançadas (verbos de ação + tecnologia + impacto).</li>
+                <li><strong>Preenchimento Completo:</strong> Quando a plataforma exigir preenchimento de campos manuais, complete todas as seções com o mesmo nível de detalhe do currículo em PDF.</li>
+              </ul>
+            </div>
+            
           </div>
         </div>
 
