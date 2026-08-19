@@ -58,6 +58,8 @@
   
   <!-- PDF.js para extração de texto local -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- JSZip para descompactar exportações do LinkedIn (.zip) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <link rel="stylesheet" href="style.css?v=6">
 </head>
@@ -526,15 +528,15 @@
             <ul style="padding-left: 20px; color: var(--ui-text-secondary); margin: 0; display: flex; flex-direction: column; gap: 6px;">
               <li>Acesse o LinkedIn: <strong>Eu → Configurações → Privacidade dos dados → Baixe seus dados</strong> (ou acesse diretamente pelo link: <a href="https://www.linkedin.com/mypreferences/d/download-my-data" target="_blank" style="color:var(--ui-success); text-decoration:underline; font-weight:600;">linkedin.com/mypreferences/d/download-my-data</a>).</li>
               <li>Escolha a segunda opção (pacote rápido de arquivos individuais) ou selecione os dados específicos (como <strong>Perfil, Experiências, Educação, Competências</strong>) e clique em <strong>Solicitar arquivo</strong>.</li>
-              <li>Quando o processamento terminar (você receberá um e-mail do LinkedIn com o aviso), baixe o arquivo <code>.zip</code>, extraia-o no seu computador e faça o upload de um ou mais dos arquivos <code>.csv</code> abaixo!</li>
+              <li>Quando o processamento terminar, baixe o arquivo <code>.zip</code> e **faça o upload dele inteiro diretamente aqui** (ou extraia-o e envie os arquivos <code>.csv</code> individuais).</li>
             </ul>
           </div>
 
           <div class="upload-dropzone" id="linkedin-csv-dropzone" style="border-color: var(--ui-success); background: rgba(16, 185, 129, 0.01);">
-            <i data-lucide="file-spreadsheet" class="upload-icon animate-pulse" style="color: var(--ui-success); margin-bottom:10px;"></i>
-            <p>Arraste e solte arquivos CSV do LinkedIn aqui, ou <span>procure arquivos</span></p>
-            <span class="file-limits">Arquivos recomendados: Profile.csv, Positions.csv, Education.csv, Skills.csv</span>
-            <input type="file" id="input-linkedin-csv-files" accept=".csv" multiple class="hidden">
+            <i data-lucide="file-archive" class="upload-icon animate-pulse" style="color: var(--ui-success); margin-bottom:10px;"></i>
+            <p>Arraste e solte o arquivo ZIP ou arquivos CSV do LinkedIn aqui, ou <span>procure arquivos</span></p>
+            <span class="file-limits">Recomendado: Basic_LinkedInDataExport_*.zip ou os arquivos Profile.csv, Positions.csv, etc.</span>
+            <input type="file" id="input-linkedin-csv-files" accept=".csv,.zip" multiple class="hidden">
           </div>
 
           <!-- List of imported CSV items -->
