@@ -544,6 +544,16 @@
             <h5 style="font-size:0.85rem; text-transform:uppercase; color:var(--ui-success); margin-bottom:8px;">Arquivos Importados:</h5>
             <ul id="linkedin-csv-imported-list" style="padding-left: 20px; font-size: 0.85rem; color: var(--ui-text-primary); display: flex; flex-direction: column; gap: 6px; list-style-type: none;"></ul>
           </div>
+
+          <!-- LinkedIn CSV Analysis Results Box -->
+          <div id="linkedin-csv-results-box" class="ats-results-box hidden" style="margin-top:24px; border-color: rgba(16, 185, 129, 0.25);">
+            <h4 style="color:#fff; margin-bottom:16px; display:flex; align-items:center; gap:8px; font-size:1.1rem;">
+              <i data-lucide="award" style="color:var(--ui-success)"></i> Relatório de Diagnóstico do LinkedIn
+            </h4>
+            <div id="linkedin-csv-analysis-content" class="ats-tips" style="border:none; padding-top:0;">
+              <!-- Recomendações da análise do ZIP/CSV inseridas via JS -->
+            </div>
+          </div>
         </div>
       </div>
     </div>
