@@ -1795,6 +1795,7 @@ a:hover {
   
   .diff-container {
     flex-direction: column;
+  }
 }
 
 /* Premium LinkedIn Analysis Report Styling */
@@ -2111,7 +2112,7 @@ a:hover {
   font-size: 0.8rem;
   font-weight: 700;
   padding: 2px 8px;
-  border-radius: var(--radius-full);
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2176,6 +2177,18 @@ a:hover {
   align-items: center;
   gap: 10px;
   flex-shrink: 0;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--ui-text-secondary);
+  border: 1px solid var(--ui-border);
+}
+
+.btn-ghost:hover {
+  background-color: var(--ui-surface-light);
+  color: var(--ui-text-primary);
+  border-color: var(--ui-border-light);
 }
 
 /* CV Quality Checklist Panel */
