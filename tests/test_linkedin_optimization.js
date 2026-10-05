@@ -326,3 +326,59 @@ test("Security & Escaping: XSS protection in original text rendering", () => {
   assert.strictEqual(contentArea.innerHTML.includes("&lt;script&gt;"), true, "Script tag must be safely HTML escaped");
 });
 
+test("Date Localization: English months and relative terms are translated to Portuguese", () => {
+  const { formatCvDate, formatLinkedinDate, normalizeCvDates } = app;
+
+  // Short month translations
+  assert.strictEqual(formatCvDate("Aug 2026"), "Ago 2026");
+  assert.strictEqual(formatCvDate("Apr 2025"), "Abr 2025");
+  assert.strictEqual(formatCvDate("Sep 2027"), "Set 2027");
+  assert.strictEqual(formatCvDate("Sept 2027"), "Set 2027");
+  assert.strictEqual(formatCvDate("Jan 2023"), "Jan 2023");
+  assert.strictEqual(formatCvDate("May 2024"), "Mai 2024");
+  assert.strictEqual(formatCvDate("Feb 2022"), "Fev 2022");
+  assert.strictEqual(formatCvDate("Oct 2023"), "Out 2023");
+  assert.strictEqual(formatCvDate("Dec 2021"), "Dez 2021");
+
+  // Full month translations
+  assert.strictEqual(formatCvDate("August 2026"), "Agosto 2026");
+  assert.strictEqual(formatCvDate("April 2025"), "Abril 2025");
+  assert.strictEqual(formatCvDate("September 2027"), "Setembro 2027");
+
+  // Status terms
+  assert.strictEqual(formatCvDate("Present"), "Presente");
+  assert.strictEqual(formatCvDate("Current"), "Atual");
+  assert.strictEqual(formatCvDate("Ongoing"), "Em andamento");
+
+  // formatLinkedinDate integration
+  assert.strictEqual(formatLinkedinDate("Aug 2026"), "Ago 2026");
+  assert.strictEqual(formatLinkedinDate("Apr 2025"), "Abr 2025");
+  assert.strictEqual(formatLinkedinDate("Sep 2027"), "Set 2027");
+  assert.strictEqual(formatLinkedinDate("Jan 2023"), "Jan 2023");
+  assert.strictEqual(formatLinkedinDate("Present"), "Presente");
+  assert.strictEqual(formatLinkedinDate("2026"), "2026");
+
+  // normalizeCvDates object traversal
+  const mockCv = {
+    experiences: [
+      { start: "Jan 2020", end: "Aug 2022" },
+      { start: "Apr 2023", end: "Present" }
+    ],
+    educations: [
+      { start: "Jan 2023", end: "Aug 2026" },
+      { start: "Apr 2025", end: "Sep 2027" }
+    ],
+    certs: [
+      { date: "May 2023" }
+    ]
+  };
+
+  normalizeCvDates(mockCv);
+  assert.strictEqual(mockCv.experiences[0].end, "Ago 2022");
+  assert.strictEqual(mockCv.experiences[1].end, "Presente");
+  assert.strictEqual(mockCv.educations[0].end, "Ago 2026");
+  assert.strictEqual(mockCv.educations[1].start, "Abr 2025");
+  assert.strictEqual(mockCv.educations[1].end, "Set 2027");
+  assert.strictEqual(mockCv.certs[0].date, "Mai 2023");
+});
+

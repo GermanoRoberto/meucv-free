@@ -103,6 +103,67 @@ function sanitizeHtml(str) {
   return clean;
 }
 
+function formatCvDate(str) {
+  if (!str) return "";
+  let s = String(str).trim();
+  if (!s || s.toLowerCase() === "n/a") return s;
+
+  // 1. Status / termos temporais em inglês
+  s = s.replace(/\bpresent\b/gi, "Presente")
+       .replace(/\bcurrent\b/gi, "Atual")
+       .replace(/\bongoing\b/gi, "Em andamento");
+
+  // 2. Meses por extenso em inglês
+  s = s.replace(/\bjanuary\b/gi, "Janeiro")
+       .replace(/\bfebruary\b/gi, "Fevereiro")
+       .replace(/\bmarch\b/gi, "Março")
+       .replace(/\bapril\b/gi, "Abril")
+       .replace(/\bjune\b/gi, "Junho")
+       .replace(/\bjuly\b/gi, "Julho")
+       .replace(/\baugust\b/gi, "Agosto")
+       .replace(/\bseptember\b/gi, "Setembro")
+       .replace(/\boctober\b/gi, "Outubro")
+       .replace(/\bnovember\b/gi, "Novembro")
+       .replace(/\bdecember\b/gi, "Dezembro");
+
+  // 3. Meses abreviados em inglês (e variações)
+  s = s.replace(/\bjan\b/gi, "Jan")
+       .replace(/\bfeb\b/gi, "Fev")
+       .replace(/\bmar\b/gi, "Mar")
+       .replace(/\bapr\b/gi, "Abr")
+       .replace(/\bmay\b/gi, "Mai")
+       .replace(/\bjun\b/gi, "Jun")
+       .replace(/\bjul\b/gi, "Jul")
+       .replace(/\baug\b/gi, "Ago")
+       .replace(/\bsept?\b/gi, "Set")
+       .replace(/\boct\b/gi, "Out")
+       .replace(/\bnov\b/gi, "Nov")
+       .replace(/\bdec\b/gi, "Dez");
+
+  return s;
+}
+
+function normalizeCvDates(cvData) {
+  if (!cvData) return;
+  if (Array.isArray(cvData.experiences)) {
+    cvData.experiences.forEach(exp => {
+      if (exp.start) exp.start = formatCvDate(exp.start);
+      if (exp.end) exp.end = formatCvDate(exp.end);
+    });
+  }
+  if (Array.isArray(cvData.educations)) {
+    cvData.educations.forEach(edu => {
+      if (edu.start) edu.start = formatCvDate(edu.start);
+      if (edu.end) edu.end = formatCvDate(edu.end);
+    });
+  }
+  if (Array.isArray(cvData.certs)) {
+    cvData.certs.forEach(c => {
+      if (c.date) c.date = formatCvDate(c.date);
+    });
+  }
+}
+
 function applyInlineMarkdown(text) {
   let escaped = escapeHtml(text);
   escaped = escaped.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
@@ -479,6 +540,9 @@ function loadLibrary() {
     appState.currentCvName = appState.library[0].name;
     appState.currentCvData = JSON.parse(JSON.stringify(appState.library[0].data));
   }
+  if (appState.currentCvData) {
+    normalizeCvDates(appState.currentCvData);
+  }
 }
 
 function saveLibrary() {
@@ -540,6 +604,7 @@ function selectActiveCv(id, force = false) {
     if (!d.skills || !Array.isArray(d.skills)) d.skills = [];
     if (!d.languages || !Array.isArray(d.languages)) d.languages = [];
     if (!d.certs || !Array.isArray(d.certs)) d.certs = [];
+    normalizeCvDates(d);
     
     
     document.getElementById("input-cv-name").value = appState.currentCvName;
@@ -1320,6 +1385,7 @@ function setupFormSync() {
 }
 
 function fillFormFromState() {
+  normalizeCvDates(appState.currentCvData);
   const d = appState.currentCvData;
   document.getElementById("personal-name").value = d.name || "";
   document.getElementById("personal-title").value = d.title || "";
@@ -1384,11 +1450,11 @@ function renderExperienceForm() {
         </div>
         <div class="form-group">
           <label for="exp-start-${idx}">Data de Início</label>
-          <input type="text" id="exp-start-${idx}" class="exp-start" data-index="${idx}" value="${escapeHtml(exp.start)}" placeholder="Ex: Jan 2021">
+          <input type="text" id="exp-start-${idx}" class="exp-start" data-index="${idx}" value="${escapeHtml(formatCvDate(exp.start))}" placeholder="Ex: Jan 2021">
         </div>
         <div class="form-group">
           <label for="exp-end-${idx}">Data de Fim</label>
-          <input type="text" id="exp-end-${idx}" class="exp-end" data-index="${idx}" value="${escapeHtml(exp.end)}" placeholder="Ex: Dez 2022 ou Presente">
+          <input type="text" id="exp-end-${idx}" class="exp-end" data-index="${idx}" value="${escapeHtml(formatCvDate(exp.end))}" placeholder="Ex: Dez 2022 ou Presente">
         </div>
         <div class="form-group col-span-2">
           <div class="tab-title-row" style="margin-bottom:0">
@@ -1474,11 +1540,11 @@ function renderEducationForm() {
         </div>
         <div class="form-group">
           <label for="edu-start-${idx}">Ano de Início</label>
-          <input type="text" id="edu-start-${idx}" class="edu-start" data-index="${idx}" value="${escapeHtml(edu.start)}" placeholder="Ex: 2016">
+          <input type="text" id="edu-start-${idx}" class="edu-start" data-index="${idx}" value="${escapeHtml(formatCvDate(edu.start))}" placeholder="Ex: 2016">
         </div>
         <div class="form-group">
           <label for="edu-end-${idx}">Ano de Conclusão</label>
-          <input type="text" id="edu-end-${idx}" class="edu-end" data-index="${idx}" value="${escapeHtml(edu.end)}" placeholder="Ex: 2020 ou Cursando">
+          <input type="text" id="edu-end-${idx}" class="edu-end" data-index="${idx}" value="${escapeHtml(formatCvDate(edu.end))}" placeholder="Ex: 2020 ou Cursando">
         </div>
         <div class="form-group col-span-2">
           <label for="edu-desc-${idx}">Descrição Opcional</label>
@@ -1598,7 +1664,7 @@ function renderCertsForm() {
         </div>
         <div class="form-group">
           <label for="cert-date-${idx}">Ano / Data</label>
-          <input type="text" id="cert-date-${idx}" class="cert-date" data-index="${idx}" value="${escapeHtml(cert.date)}" placeholder="Ex: 2023">
+          <input type="text" id="cert-date-${idx}" class="cert-date" data-index="${idx}" value="${escapeHtml(formatCvDate(cert.date))}" placeholder="Ex: 2023">
         </div>
         <div class="form-group col-span-2">
           <label for="cert-desc-${idx}">Descrição</label>
@@ -1764,7 +1830,7 @@ function renderCv() {
           <div class="cv-item">
             <div class="cv-item-header">
               <span class="cv-item-role">${escapeHtml(exp.role || "Cargo")}</span>
-              <span class="cv-item-date">${escapeHtml(exp.start || "")} - ${escapeHtml(exp.end || "")}</span>
+              <span class="cv-item-date">${exp.start && exp.end ? `${escapeHtml(formatCvDate(exp.start))} - ${escapeHtml(formatCvDate(exp.end))}` : escapeHtml(formatCvDate(exp.start || exp.end || ""))}</span>
             </div>
             <div class="cv-item-sub">${escapeHtml(exp.company || "Empresa")}</div>
             ${exp.desc ? `<div class="cv-item-desc">${formatDesc(exp.desc)}</div>` : ""}
@@ -1784,7 +1850,7 @@ function renderCv() {
           <div class="cv-item">
             <div class="cv-item-header">
               <span class="cv-item-role">${escapeHtml(edu.degree || "")} ${edu.field ? `em ${escapeHtml(edu.field)}` : ""}</span>
-              <span class="cv-item-date">${escapeHtml(edu.start || "")} - ${escapeHtml(edu.end || "")}</span>
+              <span class="cv-item-date">${edu.start && edu.end ? `${escapeHtml(formatCvDate(edu.start))} - ${escapeHtml(formatCvDate(edu.end))}` : escapeHtml(formatCvDate(edu.start || edu.end || ""))}</span>
             </div>
             <div class="cv-item-sub">${escapeHtml(edu.institution || "")}</div>
             ${edu.desc ? `<div class="cv-item-desc"><p>${escapeHtml(edu.desc)}</p></div>` : ""}
@@ -1833,7 +1899,7 @@ function renderCv() {
         <div class="cv-item" style="margin-bottom: 8pt;">
           <div class="cv-item-header">
             <span class="cv-item-role">${escapeHtml(c.title || "")}</span>
-            <span class="cv-item-date">${escapeHtml(c.date || "")}</span>
+            <span class="cv-item-date">${escapeHtml(formatCvDate(c.date || ""))}</span>
           </div>
           ${c.desc ? `<div class="cv-item-desc"><p>${escapeHtml(c.desc)}</p></div>` : ""}
         </div>
@@ -1844,7 +1910,7 @@ function renderCv() {
     if (simpleCerts.length > 0) {
       const itemsText = simpleCerts.map(c => {
         const title = escapeHtml(c.title || "");
-        const date = c.date && c.date !== "N/A" ? ` (${escapeHtml(c.date)})` : "";
+        const date = c.date && c.date !== "N/A" ? ` (${escapeHtml(formatCvDate(c.date))})` : "";
         const issuer = c.desc && c.desc !== "N/A" ? ` - ${escapeHtml(c.desc)}` : "";
         return `<span class="cv-skills-bold">${title}</span>${issuer}${date}`;
       }).join(" &bull; ");
@@ -3387,7 +3453,7 @@ function formatLinkedinDate(dateStr) {
     return dateStr;
   }
   
-  return dateStr;
+  return formatCvDate(dateStr);
 }
 
 function synthesizeLinkedinHighPerformanceContent(rawTitle = "", rawSummary = "", cvData = {}) {
@@ -3593,20 +3659,22 @@ function mergeLinkedinPositionsCsv(rows) {
     const row = rows[i];
     if (row.length < 2 || !row[0]) continue;
     
-    const company = getColVal(row, "company name") || getColVal(row, "company");
-    const title = getColVal(row, "title") || getColVal(row, "role");
-    const desc = getColVal(row, "description") || getColVal(row, "desc");
-    const start = getColVal(row, "started on") || getColVal(row, "start date");
-    const end = getColVal(row, "finished on") || getColVal(row, "end date");
+    const company = (getColVal(row, "company name") || getColVal(row, "company") || "").trim();
+    const title = (getColVal(row, "title") || getColVal(row, "role") || "").trim();
+    const desc = getColVal(row, "description") || getColVal(row, "desc") || "";
+    const start = (getColVal(row, "started on") || getColVal(row, "start date") || "").trim();
+    const end = (getColVal(row, "finished on") || getColVal(row, "end date") || "").trim();
+    
+    if (!company && !title) continue;
     
     const startFormatted = formatLinkedinDate(start);
     const endFormatted = end ? formatLinkedinDate(end) : "Presente";
     
     
     const exists = appState.currentCvData.experiences.some(e => 
-      e.company.toLowerCase() === company.toLowerCase() && 
-      e.role.toLowerCase() === title.toLowerCase() &&
-      (e.start || "").toLowerCase() === (startFormatted || "").toLowerCase()
+      (e.company || "").trim().toLowerCase() === company.toLowerCase() && 
+      (e.role || "").trim().toLowerCase() === title.toLowerCase() &&
+      (e.start || "").trim().toLowerCase() === (startFormatted || "").toLowerCase()
     );
     
     if (!exists) {
@@ -3641,21 +3709,26 @@ function mergeLinkedinEducationCsv(rows) {
     const row = rows[i];
     if (row.length < 2 || !row[0]) continue;
     
-    const institution = getColVal(row, "school name") || getColVal(row, "institution");
-    const degree = getColVal(row, "degree name") || getColVal(row, "degree");
-    const field = getColVal(row, "fields of study") || getColVal(row, "field");
-    const start = getColVal(row, "started on") || getColVal(row, "start date");
-    const end = getColVal(row, "finished on") || getColVal(row, "end date");
+    const institution = (getColVal(row, "school name") || getColVal(row, "institution") || "").trim();
+    const degree = (getColVal(row, "degree name") || getColVal(row, "degree") || "").trim();
+    const field = (getColVal(row, "fields of study") || getColVal(row, "field") || "").trim();
+    const start = (getColVal(row, "started on") || getColVal(row, "start date") || "").trim();
+    const end = (getColVal(row, "finished on") || getColVal(row, "end date") || "").trim();
+    
+    if (!institution && !degree) continue;
     
     const startFormatted = formatLinkedinDate(start);
     const endFormatted = formatLinkedinDate(end);
     
     
-    const exists = appState.currentCvData.educations.some(e => 
-      e.institution.toLowerCase() === institution.toLowerCase() && 
-      (e.degree || "").toLowerCase() === (degree || "").toLowerCase() &&
-      (e.field || "").toLowerCase() === (field || "").toLowerCase()
-    );
+    const exists = appState.currentCvData.educations.some(e => {
+      const eInst = (e.institution || "").trim().toLowerCase();
+      const eDeg = (e.degree || "").trim().toLowerCase();
+      const eField = (e.field || "").trim().toLowerCase();
+      return eInst === institution.toLowerCase() && 
+             (eDeg === degree.toLowerCase() || (!eDeg && !degree)) &&
+             (eField === field.toLowerCase() || (!eField && !field));
+    });
     
     if (!exists) {
       appState.currentCvData.educations.push({
@@ -3942,6 +4015,8 @@ if (typeof window !== "undefined") {
   window.updateLinkedinRestoreButtonUI = updateLinkedinRestoreButtonUI;
   window.mergeLinkedinProfileCsv = mergeLinkedinProfileCsv;
   window.runLocalLinkedinLinkedinHeuristics = runLocalLinkedinLinkedinHeuristics;
+  window.formatCvDate = formatCvDate;
+  window.normalizeCvDates = normalizeCvDates;
 }
 
 if (typeof module !== "undefined" && module.exports) {
@@ -3954,6 +4029,8 @@ if (typeof module !== "undefined" && module.exports) {
     mergeLinkedinProfileCsv,
     runLocalLinkedinLinkedinHeuristics,
     formatLinkedinDate,
+    formatCvDate,
+    normalizeCvDates,
     parseCSV,
     DEFAULT_CV_DATA
   };
