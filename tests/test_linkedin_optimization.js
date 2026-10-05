@@ -382,3 +382,51 @@ test("Date Localization: English months and relative terms are translated to Por
   assert.strictEqual(mockCv.certs[0].date, "Mai 2023");
 });
 
+test("Academic Localization: English courses, fields of study and degrees are translated to Portuguese", () => {
+  const { translateAcademicFieldPt, translateAcademicDegreePt, normalizeCvData } = app;
+
+  // Exact fields
+  assert.strictEqual(translateAcademicFieldPt("Computer Engineering"), "Engenharia de Computação");
+  assert.strictEqual(translateAcademicFieldPt("computer engineering"), "Engenharia de Computação");
+  assert.strictEqual(translateAcademicFieldPt("Computer Science"), "Ciência da Computação");
+  assert.strictEqual(translateAcademicFieldPt("Software Engineering"), "Engenharia de Software");
+  assert.strictEqual(translateAcademicFieldPt("Information Technology"), "Tecnologia da Informação");
+  assert.strictEqual(translateAcademicFieldPt("Cybersecurity"), "Defesa Cibernética");
+
+  // Exact degrees
+  assert.strictEqual(translateAcademicDegreePt("Bachelor's degree"), "Bacharelado");
+  assert.strictEqual(translateAcademicDegreePt("Bachelor"), "Bacharelado");
+  assert.strictEqual(translateAcademicDegreePt("Master's degree"), "Mestrado");
+  assert.strictEqual(translateAcademicDegreePt("Associate degree"), "Curso Superior de Tecnologia (CST)");
+
+  // Full object normalization
+  const mockCv = {
+    educations: [
+      {
+        institution: "Descomplica Faculdade Digital",
+        degree: "Bacharelado",
+        field: "Computer Engineering",
+        start: "2023",
+        end: "Aug 2026"
+      },
+      {
+        institution: "Gran Faculdade",
+        degree: "Associate degree",
+        field: "Cybersecurity",
+        start: "Apr 2025",
+        end: "Sep 2027"
+      }
+    ]
+  };
+
+  normalizeCvData(mockCv);
+  assert.strictEqual(mockCv.educations[0].degree, "Bacharelado");
+  assert.strictEqual(mockCv.educations[0].field, "Engenharia de Computação");
+  assert.strictEqual(mockCv.educations[0].end, "Ago 2026");
+
+  assert.strictEqual(mockCv.educations[1].degree, "Curso Superior de Tecnologia (CST)");
+  assert.strictEqual(mockCv.educations[1].field, "Defesa Cibernética");
+  assert.strictEqual(mockCv.educations[1].start, "Abr 2025");
+  assert.strictEqual(mockCv.educations[1].end, "Set 2027");
+});
+

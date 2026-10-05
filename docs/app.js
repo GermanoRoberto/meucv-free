@@ -143,6 +143,104 @@ function formatCvDate(str) {
   return s;
 }
 
+const ACADEMIC_FIELDS_PT = {
+  "computer engineering": "Engenharia de Computação",
+  "computer science": "Ciência da Computação",
+  "software engineering": "Engenharia de Software",
+  "information technology": "Tecnologia da Informação",
+  "information systems": "Sistemas de Informação",
+  "cybersecurity": "Defesa Cibernética",
+  "cyber security": "Defesa Cibernética",
+  "information security": "Segurança da Informação",
+  "data science": "Ciência de Dados",
+  "artificial intelligence": "Inteligência Artificial",
+  "cloud computing": "Computação em Nuvem",
+  "computer and information sciences": "Ciência da Computação e Informática",
+  "electrical engineering": "Engenharia Elétrica",
+  "electronic engineering": "Engenharia Eletrônica",
+  "telecommunications engineering": "Engenharia de Telecomunicações",
+  "mechanical engineering": "Engenharia Mecânica",
+  "civil engineering": "Engenharia Civil",
+  "production engineering": "Engenharia de Produção",
+  "chemical engineering": "Engenharia Química",
+  "business administration": "Administração de Empresas",
+  "business management": "Gestão Empresarial",
+  "project management": "Gestão de Projetos",
+  "human resources": "Recursos Humanos",
+  "human resources management": "Gestão de Recursos Humanos",
+  "marketing": "Marketing",
+  "digital marketing": "Marketing Digital",
+  "finance": "Finanças",
+  "financial management": "Gestão Financeira",
+  "accounting": "Ciências Contábeis",
+  "economics": "Economia",
+  "law": "Direito",
+  "logistics": "Logística",
+  "graphic design": "Design Gráfico",
+  "web development": "Desenvolvimento Web",
+  "systems analysis and development": "Análise e Desenvolvimento de Sistemas",
+  "data analytics": "Análise de Dados"
+};
+
+const ACADEMIC_DEGREES_PT = {
+  "bachelor's degree": "Bacharelado",
+  "bachelor's": "Bacharelado",
+  "bachelor of science": "Bacharelado",
+  "bachelor of engineering": "Bacharelado",
+  "bachelor of arts": "Bacharelado",
+  "bachelor": "Bacharelado",
+  "master's degree": "Mestrado",
+  "master's": "Mestrado",
+  "master of science": "Mestrado",
+  "master": "Mestrado",
+  "associate's degree": "Curso Superior de Tecnologia (CST)",
+  "associate degree": "Curso Superior de Tecnologia (CST)",
+  "associate of science": "Curso Superior de Tecnologia (CST)",
+  "associate": "Curso Superior de Tecnologia (CST)",
+  "postgraduate degree": "Pós-Graduação",
+  "postgraduate diploma": "Pós-Graduação",
+  "postgraduate": "Pós-Graduação",
+  "specialization": "Especialização",
+  "doctor of philosophy": "Doutorado",
+  "phd": "Doutorado",
+  "doctorate": "Doutorado",
+  "high school diploma": "Ensino Médio",
+  "technical course": "Curso Técnico",
+  "technician": "Técnico"
+};
+
+function translateAcademicFieldPt(str) {
+  if (!str) return "";
+  let s = String(str).trim();
+  const lower = s.toLowerCase();
+  if (ACADEMIC_FIELDS_PT[lower]) {
+    return ACADEMIC_FIELDS_PT[lower];
+  }
+  for (const [en, pt] of Object.entries(ACADEMIC_FIELDS_PT)) {
+    const reg = new RegExp(`\\b${en}\\b`, "gi");
+    if (reg.test(s)) {
+      s = s.replace(reg, pt);
+    }
+  }
+  return s;
+}
+
+function translateAcademicDegreePt(str) {
+  if (!str) return "";
+  let s = String(str).trim();
+  const lower = s.toLowerCase();
+  if (ACADEMIC_DEGREES_PT[lower]) {
+    return ACADEMIC_DEGREES_PT[lower];
+  }
+  for (const [en, pt] of Object.entries(ACADEMIC_DEGREES_PT)) {
+    const reg = new RegExp(`\\b${en}\\b`, "gi");
+    if (reg.test(s)) {
+      s = s.replace(reg, pt);
+    }
+  }
+  return s;
+}
+
 function normalizeCvDates(cvData) {
   if (!cvData) return;
   if (Array.isArray(cvData.experiences)) {
@@ -160,6 +258,17 @@ function normalizeCvDates(cvData) {
   if (Array.isArray(cvData.certs)) {
     cvData.certs.forEach(c => {
       if (c.date) c.date = formatCvDate(c.date);
+    });
+  }
+}
+
+function normalizeCvData(cvData) {
+  if (!cvData) return;
+  normalizeCvDates(cvData);
+  if (Array.isArray(cvData.educations)) {
+    cvData.educations.forEach(edu => {
+      if (edu.degree) edu.degree = translateAcademicDegreePt(edu.degree);
+      if (edu.field) edu.field = translateAcademicFieldPt(edu.field);
     });
   }
 }
@@ -541,7 +650,7 @@ function loadLibrary() {
     appState.currentCvData = JSON.parse(JSON.stringify(appState.library[0].data));
   }
   if (appState.currentCvData) {
-    normalizeCvDates(appState.currentCvData);
+    normalizeCvData(appState.currentCvData);
   }
 }
 
@@ -604,7 +713,7 @@ function selectActiveCv(id, force = false) {
     if (!d.skills || !Array.isArray(d.skills)) d.skills = [];
     if (!d.languages || !Array.isArray(d.languages)) d.languages = [];
     if (!d.certs || !Array.isArray(d.certs)) d.certs = [];
-    normalizeCvDates(d);
+    normalizeCvData(d);
     
     
     document.getElementById("input-cv-name").value = appState.currentCvName;
@@ -629,6 +738,7 @@ function selectActiveCv(id, force = false) {
 
 function saveActiveCvStateToLibrary() {
   if (!appState.currentCvId) return;
+  normalizeCvData(appState.currentCvData);
   const index = appState.library.findIndex(c => String(c.id) === String(appState.currentCvId));
   if (index !== -1) {
     appState.library[index].name = appState.currentCvName;
@@ -1385,7 +1495,7 @@ function setupFormSync() {
 }
 
 function fillFormFromState() {
-  normalizeCvDates(appState.currentCvData);
+  normalizeCvData(appState.currentCvData);
   const d = appState.currentCvData;
   document.getElementById("personal-name").value = d.name || "";
   document.getElementById("personal-title").value = d.title || "";
@@ -1532,11 +1642,11 @@ function renderEducationForm() {
         </div>
         <div class="form-group">
           <label for="edu-deg-${idx}">Grau / Nível</label>
-          <input type="text" id="edu-deg-${idx}" class="edu-deg" data-index="${idx}" value="${escapeHtml(edu.degree)}" placeholder="Ex: Bacharelado, Técnico">
+          <input type="text" id="edu-deg-${idx}" class="edu-deg" data-index="${idx}" value="${escapeHtml(translateAcademicDegreePt(edu.degree))}" placeholder="Ex: Bacharelado, Técnico">
         </div>
         <div class="form-group">
           <label for="edu-field-${idx}">Curso / Área de Estudo</label>
-          <input type="text" id="edu-field-${idx}" class="edu-field" data-index="${idx}" value="${escapeHtml(edu.field)}" placeholder="Ex: Ciência da Computação">
+          <input type="text" id="edu-field-${idx}" class="edu-field" data-index="${idx}" value="${escapeHtml(translateAcademicFieldPt(edu.field))}" placeholder="Ex: Ciência da Computação">
         </div>
         <div class="form-group">
           <label for="edu-start-${idx}">Ano de Início</label>
@@ -1849,7 +1959,7 @@ function renderCv() {
         ${data.educations.map(edu => `
           <div class="cv-item">
             <div class="cv-item-header">
-              <span class="cv-item-role">${escapeHtml(edu.degree || "")} ${edu.field ? `em ${escapeHtml(edu.field)}` : ""}</span>
+              <span class="cv-item-role">${escapeHtml(translateAcademicDegreePt(edu.degree || ""))} ${edu.field ? `em ${escapeHtml(translateAcademicFieldPt(edu.field))}` : ""}</span>
               <span class="cv-item-date">${edu.start && edu.end ? `${escapeHtml(formatCvDate(edu.start))} - ${escapeHtml(formatCvDate(edu.end))}` : escapeHtml(formatCvDate(edu.start || edu.end || ""))}</span>
             </div>
             <div class="cv-item-sub">${escapeHtml(edu.institution || "")}</div>
@@ -2383,8 +2493,12 @@ async function adaptCvToJobWithAI() {
     4. PRESERVAÇÃO E ADAPTAÇÃO DE PROJETOS E INICIATIVAS DE DESTAQUE: Nunca remova, oculte ou ignore projetos autorais, iniciativas de destaque, pesquisas ou ferramentas de autoria própria (como 'Vext Hub'). Reescreva a descrição detalhada dessas iniciativas (bullets) adaptando-as para ressaltar a aplicação prática de competências e o uso de palavras-chaves que gerem valor para a vaga de trabalho pretendida (por exemplo, correlacionando-os com as necessidades técnicas ou processos descritos na vaga).
     5. PRESERVAÇÃO DE HABILIDADES DIFERENCIAIS: Se o candidato possui competências avançadas, especializações profundas, metodologias diferenciadas ou conhecimentos inovadores (como técnicas de segurança cibernética, engenharia de prompt, liderança ou ferramentas tecnológicas), essas habilidades devem ser preservadas e integradas de forma prática e estratégica no Resumo Profissional, nas Habilidades e nas Experiências, demonstrando seu uso no dia a dia da nova função.
     6. CERTIFICADOS, CURSOS E PROJETOS DETALHADOS (certs): Mantenha todos os certificados, cursos e projetos do candidato. Nunca copie descrições de projetos complexos verbatim (palavra por palavra) sem fazer a devida adaptação de contexto e vocabulário alinhados à vaga de emprego. Conecte cada projeto ou certificado de forma inteligente com os requisitos técnicos do cargo.
+    7. REGRA ABSOLUTA DE IDIOMA E LOCALIZAÇÃO (PORTUGUÊS DO BRASIL):
+       - O currículo otimizado DEVE ser mantido 100% em Português do Brasil (pt-BR).
+       - NUNCA traduza nomes de cursos, faculdades, formações acadêmicas ou cargos para o inglês sem pedido explícito. Mantenha estritamente 'Engenharia de Computação' (JAMAIS 'Computer Engineering'), 'Defesa Cibernética' (JAMAIS 'Cybersecurity'), 'Bacharelado' (JAMAIS 'Bachelor'), etc.
+       - Apenas termos técnicos globais e tecnologias consagradas (Python, Docker, React, AWS, SQL) devem permanecer como são.
     
-    7. Retorne OBRIGATORIAMENTE um objeto JSON com o seguinte formato exato (sem formatação markdown extra, sem blocos de código markdown como \`\`\`json, e sem aspas fora do JSON):
+    8. Retorne OBRIGATORIAMENTE um objeto JSON com o seguinte formato exato (sem formatação markdown extra, sem blocos de código markdown como \`\`\`json, e sem aspas fora do JSON):
     {
       "explanation": "Explicação pedagógica detalhada em tópicos em português informando quais palavras-chaves da vaga foram incorporadas, quais alterações no resumo foram feitas e de que forma as experiências e projetos foram reescritos e adaptados.",
       "optimizedCv": {
@@ -2449,6 +2563,9 @@ async function adaptCvToJobWithAI() {
       .trim();
       
     const parsedData = JSON.parse(cleanJson);
+    if (parsedData.optimizedCv) {
+      normalizeCvData(parsedData.optimizedCv);
+    }
     
     pendingChange = {
       type: "cv",
@@ -2593,7 +2710,8 @@ async function processRawTextImport() {
     4. RESUMO PROFISSIONAL: Caso o currículo original não possua um resumo ou tenha um resumo fraco, estruture um resumo objetivo de 3 a 5 linhas baseado estritamente na área e experiências informadas no texto.
     5. EXPERIÊNCIA PROFISSIONAL: Estruture os bullets das experiências usando verbos de ação fortes no início (Desenvolvi, Liderei, Reduzi, Otimizei, Automatizei), mantendo métricas originais quando presentes.
     6. Na chave "certs", extraia TODOS os Certificados, Cursos Livres e Projetos listados no texto.
-    7. Retorne APENAS um objeto JSON válido contendo exatamente as chaves abaixo. Não inclua markdown, aspas extras fora do JSON, ou qualquer texto adicional.
+    7. LOCALIZAÇÃO E IDIOMA OBRIGATÓRIO (PORTUGUÊS DO BRASIL): O resultado JSON deve estar 100% em Português do Brasil (pt-BR). Se o texto original extraído de PDFs ou do LinkedIn contiver termos acadêmicos em inglês padrão da plataforma (como 'Computer Engineering', 'Computer Science', 'Software Engineering', 'Bachelor', etc.), converta-os obrigatoriamente para a nomenclatura brasileira ('Engenharia de Computação', 'Ciência da Computação', 'Engenharia de Software', 'Bacharelado', etc.). As datas devem estar em português (ex: Jan 2021, Presente).
+    8. Retorne APENAS um objeto JSON válido contendo exatamente as chaves abaixo. Não inclua markdown, aspas extras fora do JSON, ou qualquer texto adicional.
 
     Estrutura do JSON obrigatório:
     {
@@ -2656,6 +2774,7 @@ async function processRawTextImport() {
       .trim();
       
     const parsedData = JSON.parse(cleanJson);
+    normalizeCvData(parsedData);
     
     const createdId = createNewCv(`Importado - ${parsedData.name || "Sem Nome"}`);
     if (!createdId) {
@@ -3710,8 +3829,8 @@ function mergeLinkedinEducationCsv(rows) {
     if (row.length < 2 || !row[0]) continue;
     
     const institution = (getColVal(row, "school name") || getColVal(row, "institution") || "").trim();
-    const degree = (getColVal(row, "degree name") || getColVal(row, "degree") || "").trim();
-    const field = (getColVal(row, "fields of study") || getColVal(row, "field") || "").trim();
+    const degree = translateAcademicDegreePt((getColVal(row, "degree name") || getColVal(row, "degree") || "").trim());
+    const field = translateAcademicFieldPt((getColVal(row, "fields of study") || getColVal(row, "field") || "").trim());
     const start = (getColVal(row, "started on") || getColVal(row, "start date") || "").trim();
     const end = (getColVal(row, "finished on") || getColVal(row, "end date") || "").trim();
     
@@ -4017,6 +4136,9 @@ if (typeof window !== "undefined") {
   window.runLocalLinkedinLinkedinHeuristics = runLocalLinkedinLinkedinHeuristics;
   window.formatCvDate = formatCvDate;
   window.normalizeCvDates = normalizeCvDates;
+  window.normalizeCvData = normalizeCvData;
+  window.translateAcademicFieldPt = translateAcademicFieldPt;
+  window.translateAcademicDegreePt = translateAcademicDegreePt;
 }
 
 if (typeof module !== "undefined" && module.exports) {
@@ -4031,6 +4153,9 @@ if (typeof module !== "undefined" && module.exports) {
     formatLinkedinDate,
     formatCvDate,
     normalizeCvDates,
+    normalizeCvData,
+    translateAcademicFieldPt,
+    translateAcademicDegreePt,
     parseCSV,
     DEFAULT_CV_DATA
   };
