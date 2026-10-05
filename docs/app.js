@@ -2303,7 +2303,7 @@ async function adaptCvToJobWithAI() {
 
   const prompt = `
     Você é um especialista sênior em recrutamento, recolocação profissional e redação de currículos de alta performance de nível global.
-    Sua missão é adaptar o currículo de um candidato para que ele seja altamente relevante para a vaga descrita abaixo, otimizando-o para passar em leitores ATS${isGupy ? ' (especificamente o portal Gupy/IA Gaia)' : isInHire ? ' (especificamente a plataforma inHire)' : ''}.
+    Sua missão é adaptar o currículo de um candidato para que ele seja altamente relevante para a vaga descrita abaixo, otimizando-o para máxima compatibilidade com leitores ATS${isGupy ? ' (especificamente o portal Gupy/IA Gaia)' : isInHire ? ' (especificamente a plataforma inHire)' : ''}.
     
     ${platformRules}
 
