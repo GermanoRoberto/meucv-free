@@ -2048,3 +2048,24 @@ a:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.badge-applied {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--ui-success);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: middle;
+}
+
+#btn-restore-linkedin-original:hover,
+.btn-restore-original:hover {
+  background-color: rgba(56, 189, 248, 0.25) !important;
+  border-color: rgba(56, 189, 248, 0.5) !important;
+  color: #fff !important;
+}

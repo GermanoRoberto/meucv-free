@@ -226,13 +226,27 @@
         <div class="tab-content-container">
           
           <!-- LinkedIn Warning Alert Banner -->
-          <div id="linkedin-import-alert" class="hidden" style="background-color: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.8rem; line-height: 1.45; color: var(--ui-text-primary);">
-            <div style="display: flex; gap: 8px; align-items: flex-start;">
-              <i data-lucide="info" style="color: #38bdf8; width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px;"></i>
-              <div>
-                <strong style="color: #38bdf8;">Importado do LinkedIn!</strong>
-                <p style="margin-top: 4px; color: var(--ui-text-secondary);">O LinkedIn não exporta datas ou descrições para algumas seções (como Certificados). Por favor, revise as datas com <strong>(N/A)</strong> nas abas ao lado para garantir um currículo completo.</p>
+          <div id="linkedin-import-alert" class="hidden" style="background-color: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 0.8rem; line-height: 1.45; color: var(--ui-text-primary);">
+            <div style="display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+              <div style="display: flex; gap: 10px; align-items: flex-start; flex: 1; min-width: 250px;">
+                <i data-lucide="sparkles" style="color: #38bdf8; width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px;"></i>
+                <div>
+                  <strong style="color: #38bdf8; font-size: 0.85rem;">Perfil Importado do LinkedIn</strong>
+                  <p id="linkedin-import-alert-desc" style="margin-top: 2px; color: var(--ui-text-secondary); font-size: 0.78rem;">
+                    Título e Resumo foram otimizados automaticamente pela IA para elevar o impacto no currículo.
+                  </p>
+                </div>
               </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <button type="button" id="btn-restore-linkedin-original" class="btn btn-sm btn-restore-original" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; font-weight: 600; font-size: 0.75rem; padding: 6px 12px; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" title="Desfazer Otimização / Restaurar Texto Original do LinkedIn" aria-label="Desfazer Otimização / Restaurar Original">
+                  <i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i>
+                  <span id="btn-restore-linkedin-label">Desfazer Otimização / Restaurar Original</span>
+                </button>
+              </div>
+            </div>
+            <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(56, 189, 248, 0.12); font-size: 0.74rem; color: var(--ui-text-muted); display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="info" style="width: 13px; height: 13px; flex-shrink: 0; color: #38bdf8;"></i>
+              <span>Revise itens com <strong>(N/A)</strong> nas abas ao lado para garantir que certificados e datas estejam completos.</span>
             </div>
           </div>
 

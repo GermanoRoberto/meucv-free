@@ -10,6 +10,7 @@ const DEFAULT_CV_DATA = {
   linkedin: "linkedin.com/in/joaosilva",
   github: "github.com/joaosilva",
   website: "",
+  linkedinOriginal: null,
   summary: "Desenvolvedor Full Stack com mais de 3 anos de experiência em desenvolvimento web utilizando React, Node.js e bancos de dados SQL/NoSQL. Apaixonado por criar soluções escaláveis, limpas e eficientes, com foco especial na qualidade de código, performance de carregamento e experiência do usuário.",
   experiences: [
     {
@@ -221,26 +222,17 @@ if (typeof pdfjsLib !== 'undefined') {
 }
 
 
-document.addEventListener("DOMContentLoaded", () => {
-  
-  loadConfig();
-  loadLibrary();
-  
-  
-  lucide.createIcons();
-  
-  
-  setupEventListeners();
-  
-  
-  setupFormSync();
-  
-  
-  fetchConfig();
-  
-  
-  console.log("Vellora CV iniciado com sucesso!");
-});
+if (typeof document !== "undefined") {
+  document.addEventListener("DOMContentLoaded", () => {
+    loadConfig();
+    loadLibrary();
+    if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
+    setupEventListeners();
+    setupFormSync();
+    fetchConfig();
+    console.log("Vellora CV iniciado com sucesso!");
+  });
+}
 
 
 function loadConfig() {
@@ -532,6 +524,12 @@ function selectActiveCv(id, force = false) {
         languages: cvItem.languages || [],
         certs: cvItem.certs || []
       };
+    }
+    if (cvItem.linkedinOriginal && !dataObj.linkedinOriginal) {
+      dataObj.linkedinOriginal = JSON.parse(JSON.stringify(cvItem.linkedinOriginal));
+    }
+    if (cvItem.isLinkedinImport && !dataObj.isLinkedinImport) {
+      dataObj.isLinkedinImport = true;
     }
     appState.currentCvData = dataObj;
     
@@ -1122,6 +1120,21 @@ function setupEventListeners() {
   document.getElementById("btn-discard-diff").addEventListener("click", () => {
     discardPendingDiff();
   });
+
+  const btnRestoreLinkedin = document.getElementById("btn-restore-linkedin-original");
+  if (btnRestoreLinkedin) {
+    btnRestoreLinkedin.addEventListener("click", () => {
+      toggleLinkedinOptimization();
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("#btn-restore-linkedin-original, .btn-restore-original");
+    if (btn) {
+      e.preventDefault();
+      toggleLinkedinOptimization();
+    }
+  });
 }
 
 
@@ -1627,15 +1640,76 @@ function renderCertsForm() {
   });
 }
 
+function updateLinkedinRestoreButtonUI() {
+  const btn = document.getElementById("btn-restore-linkedin-original");
+  const desc = document.getElementById("linkedin-import-alert-desc");
+  if (!btn) return;
+  
+  const data = appState.currentCvData;
+  if (!data || !data.linkedinOriginal) {
+    btn.style.display = "none";
+    return;
+  }
+  
+  btn.style.display = "inline-flex";
+  
+  if (data.linkedinOriginal.isOptimizedApplied) {
+    btn.innerHTML = `<i data-lucide="rotate-ccw" style="width: 14px; height: 14px;"></i> <span id="btn-restore-linkedin-label">Desfazer Otimização / Restaurar Original</span>`;
+    btn.title = "Desfazer Otimização / Restaurar Texto Original do LinkedIn";
+    btn.setAttribute("aria-label", "Desfazer Otimização / Restaurar Original");
+    if (desc) {
+      desc.innerHTML = `Título e Resumo foram otimizados automaticamente pela IA para elevar o impacto no currículo.`;
+    }
+  } else {
+    btn.innerHTML = `<i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> <span id="btn-restore-linkedin-label">Reaplicar Otimização da IA</span>`;
+    btn.title = "Reaplicar Otimização da IA para Título e Resumo";
+    btn.setAttribute("aria-label", "Reaplicar Otimização da IA");
+    if (desc) {
+      desc.innerHTML = `Textos brutos originais do LinkedIn restaurados no currículo.`;
+    }
+  }
+  
+  if (window.lucide && typeof lucide.createIcons === "function") {
+    lucide.createIcons();
+  }
+}
+
+function toggleLinkedinOptimization() {
+  const cv = appState.currentCvData;
+  if (!cv || !cv.linkedinOriginal) {
+    showToast("Nenhum dado original do LinkedIn disponível para restauração.", "warning");
+    return;
+  }
+  
+  if (cv.linkedinOriginal.isOptimizedApplied) {
+    // Reverter para o original do LinkedIn
+    cv.title = cv.linkedinOriginal.title || "";
+    cv.summary = cv.linkedinOriginal.summary || "";
+    cv.linkedinOriginal.isOptimizedApplied = false;
+    showToast("Texto original do LinkedIn restaurado!", "info");
+  } else {
+    // Reaplicar otimização pela IA
+    cv.title = cv.linkedinOriginal.optimizedTitle || "";
+    cv.summary = cv.linkedinOriginal.optimizedSummary || "";
+    cv.linkedinOriginal.isOptimizedApplied = true;
+    showToast("Versão otimizada pela IA reaplicada!", "success");
+  }
+  
+  fillFormFromState();
+  renderCv();
+  saveActiveCvStateToLibrary();
+}
+
 function checkLinkedinImportAlert() {
   const alertBanner = document.getElementById("linkedin-import-alert");
   if (!alertBanner) return;
   
   const data = appState.currentCvData;
-  const isLinkedinImport = data && (data.isLinkedinImport || (appState.currentCvName && appState.currentCvName.includes("LinkedIn")));
+  const isLinkedinImport = data && (data.isLinkedinImport || (data.linkedinOriginal && (data.linkedinOriginal.title || data.linkedinOriginal.summary)) || (appState.currentCvName && appState.currentCvName.includes("LinkedIn")));
   
   if (isLinkedinImport) {
     alertBanner.classList.remove("hidden");
+    updateLinkedinRestoreButtonUI();
   } else {
     alertBanner.classList.add("hidden");
   }
@@ -3178,6 +3252,7 @@ function handleLinkedinCsvUploads(files) {
         setStatus("Finalizando e atualizando currículo...");
         await new Promise(resolve => setTimeout(resolve, 200));
         
+        refineLinkedinOptimizations();
         saveActiveCvStateToLibrary();
         fillFormFromState();
         renderCv();
@@ -3259,6 +3334,7 @@ function handleLinkedinCsvUploads(files) {
         processedCount++;
         if (processedCount === filesArray.length) {
           if (importedAnyCsv) {
+            refineLinkedinOptimizations();
             saveActiveCvStateToLibrary();
             fillFormFromState();
             renderCv();
@@ -3314,14 +3390,155 @@ function formatLinkedinDate(dateStr) {
   return dateStr;
 }
 
+function synthesizeLinkedinHighPerformanceContent(rawTitle = "", rawSummary = "", cvData = {}) {
+  let title = String(rawTitle || "").trim();
+  let summary = String(rawSummary || "").trim();
+  
+  // 1. SÍNTESE DE TÍTULO DE ALTA PERFORMANCE
+  let optimizedTitle = "";
+  if (title) {
+    // Remover emojis e caracteres especiais decorativos
+    let clean = title.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}]/gu, "").trim();
+    // Remover hashtags comuns do LinkedIn (#opentowork, etc.)
+    clean = clean.replace(/#\w+/g, "").trim();
+
+    // Quebrar por delimitadores usuais
+    const rawSegments = clean.split(/[|•–—/]/).flatMap(s => s.split(" - ")).map(s => s.trim()).filter(Boolean);
+    const clutterRegex = /\b(?:open\s*to\s*work|opentowork|open\s*for\s*work|buscando|em\s*busca|dispon[íi]vel|transi[çc][ãa]o|apaixonad[oa]|entusiasta|amante|procurando)\b/i;
+
+    const validSegments = [];
+    for (const seg of rawSegments) {
+      let s = seg.replace(/^(?:na|no|at|@)\s+/i, "").replace(/\s+(?:na|no|at|@)\s+.*$/i, "").trim();
+      if (s.length > 1 && !clutterRegex.test(s)) {
+        if (/^dev\b/i.test(s)) s = s.replace(/^dev\b/i, "Desenvolvedor");
+        if (/^eng\b/i.test(s)) s = s.replace(/^eng\b/i, "Engenheiro");
+        validSegments.push(s);
+      }
+    }
+
+    if (validSegments.length > 0) {
+      let mainRole = validSegments[0];
+      mainRole = mainRole.charAt(0).toUpperCase() + mainRole.slice(1);
+
+      let techParts = [];
+      for (let i = 1; i < validSegments.length; i++) {
+        const subParts = validSegments[i].split(",").map(p => p.trim()).filter(p => p.length > 0 && !clutterRegex.test(p));
+        techParts.push(...subParts);
+      }
+
+      if (techParts.length === 0 && Array.isArray(cvData.skills) && cvData.skills.length > 0) {
+        techParts = cvData.skills.slice(0, 3);
+      }
+
+      if (techParts.length > 0) {
+        const cleanTech = techParts.slice(0, 4);
+        optimizedTitle = `${mainRole} | ${cleanTech.join(" • ")}`;
+      } else {
+        optimizedTitle = mainRole;
+      }
+    } else {
+      optimizedTitle = clean.trim();
+    }
+  }
+
+  if (!optimizedTitle) {
+    if (Array.isArray(cvData.experiences) && cvData.experiences.length > 0 && cvData.experiences[0].role) {
+      optimizedTitle = cvData.experiences[0].role.trim();
+    } else {
+      optimizedTitle = "Profissional de Tecnologia";
+    }
+  }
+
+  // 2. SÍNTESE DE RESUMO PROFISSIONAL DE ALTO IMPACTO
+  let optimizedSummary = "";
+  if (summary) {
+    let text = summary;
+    // Remover emojis
+    text = text.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F64F}\u{1F680}-\u{1F6FF}\u{1F900}-\u{1F9FF}]/gu, " ");
+
+    // Remover saudações
+    text = text.replace(/\b(?:ol[áa](?:\s+(?:a\s+todos|pessoal|gente|rede|galera))?|oi(?:\s+(?:pessoal|gente|galera))?|fala\s+pessoal|sejam?\s+(?:muito\s+)?bem[\s-]vindos?(?:\s+ao\s+meu\s+perfil)?|welcome(?:\s+to\s+my\s+profile)?)[!.,\s]*/gi, " ");
+
+    // Remover redundâncias de autoapresentação: "Meu nome é...", "Me chamo...", "Sou o..."
+    text = text.replace(/\b(?:meu\s+nome\s+[ée]|me\s+chamo|sou\s+(?:o|a)?)\s+[A-Za-zÀ-ÿ\s]+?\s+(?:e|,)\s*/gi, " ");
+
+    // Remover contatos (emails, URLs, telefones, blocos de contato)
+    text = text.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gi, " ");
+    text = text.replace(/https?:\/\/[^\s]+|linkedin\.com\/[^\s]+/gi, " ");
+    text = text.replace(/(?:\+?55\s*)?(?:\(?\d{2}\)?\s*)?\d{4,5}[-\s]?\d{4}/g, " ");
+    text = text.replace(/\b(?:para\s+contato|contato|contatos|fale\s+comigo|entre\s+em\s+contato|e-?mail|telefone|celular|whatsapp|linkedin)\s*:[^\n\.]*/gi, " ");
+
+    // Remover frases de busca de recolocação
+    text = text.replace(/\b(?:(?:atualmente\s+)?em\s+busca\s+de\s+(?:novas?\s+)?(?:oportunidades?|desafios?|recoloca[çc][ãa]o)|buscando\s+(?:novas?\s+)?(?:oportunidades?|desafios?|recoloca[çc][ãa]o)|dispon[íi]vel\s+para\s+(?:o\s+mercado|novos?\s+desafios?|recoloca[çc][ãa]o)|em\s+transi[çc][ãa]o\s+de\s+carreira)[^\n\.]*[\.\n!]?/gi, " ");
+
+    // Dividir em sentenças válidas
+    const sentences = text.split(/[\n\.]+/).map(s => s.trim().replace(/^[,;\s\-]+/, "")).filter(s => s.length > 10);
+    if (sentences.length > 0) {
+      let cleanText = sentences.map(s => {
+        s = s.charAt(0).toUpperCase() + s.slice(1);
+        if (!/[!\?]$/.test(s)) s += ".";
+        return s;
+      }).join(" ");
+
+      const roleBase = (optimizedTitle.split("|")[0] || "Profissional").trim();
+      if (/^Tenho\b/i.test(cleanText)) {
+        cleanText = `${roleBase} com ` + cleanText.slice(6);
+      } else if (/^(?:Com|Atuo|Atuando)\b/i.test(cleanText)) {
+        cleanText = `${roleBase} ` + cleanText;
+      }
+
+      if (!/(?:impacto|resultados|escal[aá]ve|boas\s*pr[aá]ticas|qualidade|valor)/i.test(cleanText) && cleanText.length < 250) {
+        cleanText += " Foco na aplicação de boas práticas, qualidade técnica e entrega consistente de valor para o negócio.";
+      }
+      optimizedSummary = cleanText.trim();
+    }
+  }
+
+  if (!optimizedSummary || optimizedSummary.length < 30) {
+    const roleBase = (optimizedTitle.split("|")[0] || "Profissional").trim();
+    let topSkillsStr = "";
+    if (Array.isArray(cvData.skills) && cvData.skills.length > 0) {
+      topSkillsStr = cvData.skills.slice(0, 4).join(", ");
+    }
+    
+    let expHighlights = "";
+    if (Array.isArray(cvData.experiences) && cvData.experiences.length > 0) {
+      const expCount = cvData.experiences.length;
+      expHighlights = ` com atuação comprovada em projetos e times dinâmicos (${expCount} experiência${expCount > 1 ? 's' : ''} relevante${expCount > 1 ? 's' : ''})`;
+    }
+    
+    optimizedSummary = `${roleBase}${expHighlights}${topSkillsStr ? `, com sólida experiência prática em ${topSkillsStr}` : ''}. Foco no desenvolvimento de soluções eficientes e escaláveis, excelência técnica, arquitetura limpa e entrega contínua de impacto mensurável para os objetivos do negócio.`;
+  }
+
+  return {
+    optimizedTitle: optimizedTitle.trim(),
+    optimizedSummary: optimizedSummary.trim()
+  };
+}
+
+function refineLinkedinOptimizations() {
+  const cv = appState.currentCvData;
+  if (!cv || !cv.linkedinOriginal || !cv.linkedinOriginal.isOptimizedApplied) return;
+  
+  const rawTitle = cv.linkedinOriginal.title || "";
+  const rawSummary = cv.linkedinOriginal.summary || "";
+  
+  const synthesized = synthesizeLinkedinHighPerformanceContent(rawTitle, rawSummary, cv);
+  cv.linkedinOriginal.optimizedTitle = synthesized.optimizedTitle;
+  cv.linkedinOriginal.optimizedSummary = synthesized.optimizedSummary;
+  
+  cv.title = synthesized.optimizedTitle;
+  cv.summary = synthesized.optimizedSummary;
+}
+
 function mergeLinkedinProfileCsv(rows) {
-  const headers = rows[0].map(h => h.toLowerCase());
+  const headers = rows[0].map(h => (h || "").toLowerCase().trim());
   const dataRow = rows[1];
   if (!dataRow) return 0;
   
   const getColVal = (name) => {
     const idx = headers.indexOf(name.toLowerCase());
-    return idx !== -1 ? dataRow[idx] : "";
+    return idx !== -1 ? (dataRow[idx] || "").trim() : "";
   };
   
   const firstName = getColVal("first name");
@@ -3332,13 +3549,28 @@ function mergeLinkedinProfileCsv(rows) {
   if (firstName || lastName) {
     appState.currentCvData.name = `${firstName} ${lastName}`.trim();
   }
-  if (headline) {
-    appState.currentCvData.title = headline;
-  }
-  if (summary) {
-    appState.currentCvData.summary = summary;
-  }
-  
+
+  const rawTitle = headline || "";
+  const rawSummary = summary || "";
+
+  // Salvar texto original bruto no estado do currículo
+  appState.currentCvData.linkedinOriginal = {
+    title: rawTitle,
+    summary: rawSummary,
+    optimizedTitle: "",
+    optimizedSummary: "",
+    isOptimizedApplied: true
+  };
+
+  // Sintetizar versões de alta performance do Título Principal e do Resumo Profissional
+  const synthesized = synthesizeLinkedinHighPerformanceContent(rawTitle, rawSummary, appState.currentCvData);
+  appState.currentCvData.linkedinOriginal.optimizedTitle = synthesized.optimizedTitle;
+  appState.currentCvData.linkedinOriginal.optimizedSummary = synthesized.optimizedSummary;
+  appState.currentCvData.linkedinOriginal.isOptimizedApplied = true;
+
+  // Aplicar automaticamente as melhorias no currículo ativo
+  appState.currentCvData.title = synthesized.optimizedTitle;
+  appState.currentCvData.summary = synthesized.optimizedSummary;
   appState.currentCvData.isLinkedinImport = true;
   return 1;
 }
@@ -3576,9 +3808,9 @@ async function runLinkedinCsvAnalysis() {
       
       Gere um relatório estruturado contendo as seguintes seções em HTML (retorne apenas o conteúdo interno das seções, sem tags <html> ou <body>):
       
-      <h3>1. Diagnóstico do Título (Headline) e Sobre</h3>
+      <h3>1. Diagnóstico do Título (Headline) e Sobre <span class="badge-applied" style="background: rgba(16, 185, 129, 0.15); color: var(--ui-success); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><i data-lucide="check-circle-2" style="width: 12px; height: 12px;"></i> Aplicado ao Currículo</span></h3>
       <ul>
-        [Insira aqui a análise se o Título é profissional e atraente. Avalie se o 'Sobre' descreve valor ou é fraco/genérico.]
+        [Insira aqui a análise se o Título é profissional e atraente. Avalie se o 'Sobre' descreve valor ou é fraco/genérico. Indique expressamente que as versões de alta performance do Título e do Sobre já foram sintetizadas e incorporadas ativamente ao currículo em edição.]
       </ul>
       <h4 style="color:var(--ui-success); margin-top:10px;">💡 Sugestão de Reescrita para o Título (Headline):</h4>
       <div style="background: rgba(255,255,255,0.03); padding: 12px; border-left: 3px solid var(--ui-success); margin: 8px 0; font-size: 0.88rem; color: #fff; font-family: monospace;">
@@ -3610,8 +3842,11 @@ async function runLinkedinCsvAnalysis() {
       if (cleanHtml.startsWith("```")) {
         cleanHtml = cleanHtml.replace(/^```html\s*/i, "").replace(/```$/, "").trim();
       }
+      if (!cleanHtml.includes("Aplicado ao Currículo")) {
+        cleanHtml = cleanHtml.replace(/(<h3>1\.[^<]*<\/h3>)/i, `$1 <span class="badge-applied" style="background: rgba(16, 185, 129, 0.15); color: var(--ui-success); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><i data-lucide="check-circle-2" style="width: 12px; height: 12px;"></i> Aplicado ao Currículo</span>`);
+      }
       contentArea.innerHTML = cleanHtml;
-      lucide.createIcons();
+      if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
     } catch (err) {
       console.warn("Erro na análise por IA, rodando heurística local:", err);
       runLocalLinkedinLinkedinHeuristics(cv, contentArea);
@@ -3631,21 +3866,27 @@ function runLocalLinkedinLinkedinHeuristics(cv, contentArea) {
     </p>
   `;
   
+  html += `<h3>1. Diagnóstico do Título e Sobre <span class="badge-applied" style="background: rgba(16, 185, 129, 0.15); color: var(--ui-success); border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: 8px; display: inline-flex; align-items: center; gap: 4px; vertical-align: middle;"><i data-lucide="check-circle-2" style="width: 12px; height: 12px;"></i> Aplicado ao Currículo</span></h3><ul>`;
   
-  html += `<h3>1. Diagnóstico do Título e Resumo</h3><ul>`;
-  if (!cv.title || cv.title.length < 15) {
-    html += `<li><strong style="color: var(--ui-warning)">[Atenção]</strong> Seu título atual é muito curto ou genérico. Um bom título deve conter palavras-chave da sua área (Ex: <em>Desenvolvedor Frontend | React | TypeScript</em>) em vez de apenas o nome do cargo isolado.</li>`;
+  html += `<li><strong style="color: var(--ui-success)">[Aplicado ao Currículo]</strong> Versões otimizadas de alta performance do Título e do Sobre foram sintetizadas e incorporadas diretamente ao currículo ativo (eliminando redundâncias do LinkedIn e elevando o impacto profissional). Você pode alternar para o texto original a qualquer momento no editor.</li>`;
+  
+  if (cv.linkedinOriginal && cv.linkedinOriginal.title) {
+    html += `<li><strong>Título Original do LinkedIn:</strong> <span style="color: var(--ui-text-muted); font-style: italic;">"${escapeHtml(cv.linkedinOriginal.title)}"</span></li>`;
+    html += `<li><strong>Título Otimizado Aplicado:</strong> <span style="color: var(--ui-success); font-weight: 600;">"${escapeHtml(cv.title)}"</span></li>`;
+  } else if (!cv.title || cv.title.length < 15) {
+    html += `<li><strong style="color: var(--ui-warning)">[Atenção]</strong> Seu título atual é muito curto ou genérico. Um bom título deve conter palavras-chave da sua área em vez de apenas o cargo isolado.</li>`;
   } else {
-    html += `<li><strong style="color: var(--ui-success)">[Excelente]</strong> Título atual identificado: <strong>"${cv.title}"</strong>. Ele está bem preenchido, mas certifique-se de que contenha os termos mais pesquisados por recrutadores da sua área.</li>`;
+    html += `<li><strong style="color: var(--ui-success)">[Excelente]</strong> Título atual identificado: <strong>"${escapeHtml(cv.title)}"</strong>. Ele está bem preenchido e alinhado aos padrões da área.</li>`;
   }
   
-  if (!cv.summary || cv.summary.length < 80) {
+  if (cv.linkedinOriginal && cv.linkedinOriginal.summary) {
+    html += `<li><strong style="color: var(--ui-success)">[Sobre Otimizado]</strong> A seção "Sobre" foi reestruturada para focar em competências centrais e entregas de valor, eliminando saudações e dados informais.</li>`;
+  } else if (!cv.summary || cv.summary.length < 80) {
     html += `<li><strong style="color: var(--ui-warning)">[Atenção]</strong> Sua seção "Sobre" está muito curta ou ausente (${cv.summary ? cv.summary.length : 0} caracteres). O resumo do LinkedIn deve conter suas principais especialidades, anos de experiência e tecnologias principais.</li>`;
   } else {
-    html += `<li><strong style="color: var(--ui-success)">[Bom]</strong> Seu resumo profissional (Sobre) possui um bom tamanho. Revise-o para garantir que foca nos seus resultados e principais realizações.</li>`;
+    html += `<li><strong style="color: var(--ui-success)">[Bom]</strong> Seu resumo profissional (Sobre) possui um bom tamanho e estrutura orientada a resultados.</li>`;
   }
   html += `</ul>`;
-  
   
   html += `<h3>2. Detalhamento das Experiências</h3><ul>`;
   let emptyDescs = [];
@@ -3671,7 +3912,6 @@ function runLocalLinkedinLinkedinHeuristics(cv, contentArea) {
   }
   html += `</ul>`;
   
-  
   html += `<h3>3. Consistência de Competências</h3><ul>`;
   if (!cv.skills || cv.skills.length < 5) {
     html += `<li><strong style="color: var(--ui-warning)">[Atenção]</strong> Você possui apenas ${cv.skills ? cv.skills.length : 0} competências cadastradas. O algoritmo do LinkedIn valoriza perfis com pelo menos 15 a 20 competências focadas na sua área de atuação.</li>`;
@@ -3679,7 +3919,6 @@ function runLocalLinkedinLinkedinHeuristics(cv, contentArea) {
     html += `<li><strong style="color: var(--ui-success)">[Bom]</strong> Foram detectadas ${cv.skills.length} competências no seu perfil. Tente fixar as 3 principais que melhor descrevem seu foco de carreira atual.</li>`;
   }
   html += `</ul>`;
-  
   
   html += `
     <h3>4. Checklist de Otimização do LinkedIn</h3>
@@ -3692,6 +3931,31 @@ function runLocalLinkedinLinkedinHeuristics(cv, contentArea) {
   `;
   
   contentArea.innerHTML = html;
-  lucide.createIcons();
+  if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
+}
+
+if (typeof window !== "undefined") {
+  window.appState = appState;
+  window.synthesizeLinkedinHighPerformanceContent = synthesizeLinkedinHighPerformanceContent;
+  window.refineLinkedinOptimizations = refineLinkedinOptimizations;
+  window.toggleLinkedinOptimization = toggleLinkedinOptimization;
+  window.updateLinkedinRestoreButtonUI = updateLinkedinRestoreButtonUI;
+  window.mergeLinkedinProfileCsv = mergeLinkedinProfileCsv;
+  window.runLocalLinkedinLinkedinHeuristics = runLocalLinkedinLinkedinHeuristics;
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    appState,
+    synthesizeLinkedinHighPerformanceContent,
+    refineLinkedinOptimizations,
+    toggleLinkedinOptimization,
+    updateLinkedinRestoreButtonUI,
+    mergeLinkedinProfileCsv,
+    runLocalLinkedinLinkedinHeuristics,
+    formatLinkedinDate,
+    parseCSV,
+    DEFAULT_CV_DATA
+  };
 }
 
