@@ -208,6 +208,51 @@
 
     <!-- Workspace Main Layout -->
     <div id="workspace-editor" class="workspace-pane active">
+      
+      <!-- CV Quality Auditor Bar -->
+      <div id="cv-quality-audit-bar" class="cv-quality-audit-bar">
+        <div class="quality-bar-left">
+          <div class="quality-badge-wrapper">
+            <span class="quality-badge-title">Qualidade ATS & RH:</span>
+            <span id="cv-quality-score-badge" class="quality-score-badge high">--/100</span>
+            <span id="cv-quality-status-label" class="quality-status-label">Calculando...</span>
+          </div>
+          <div class="quality-pills-list">
+            <span id="pill-contact" class="quality-pill" title="Contato e Redes">Contato: --</span>
+            <span id="pill-summary" class="quality-pill" title="Resumo Profissional">Resumo: --</span>
+            <span id="pill-exp" class="quality-pill" title="Experiências e Método STAR">Experiências: --</span>
+            <span id="pill-edu" class="quality-pill" title="Formação Acadêmica">Formação: --</span>
+            <span id="pill-skills" class="quality-pill" title="Habilidades e Projetos">Skills: --</span>
+          </div>
+        </div>
+
+        <div class="quality-bar-right">
+          <button id="btn-toggle-quality-checklist" class="btn btn-sm btn-ghost" title="Ver checklist e diagnóstico detalhado">
+            <i data-lucide="list-checks"></i>
+            <span>Diagnóstico & Checklist</span>
+            <i data-lucide="chevron-down" id="icon-toggle-quality" style="transition: transform 0.2s;"></i>
+          </button>
+          <button id="btn-optimize-full-cv" class="btn btn-sm btn-primary" title="Otimizar todo o currículo com IA para padrão executivo">
+            <i data-lucide="sparkles"></i>
+            <span>Otimizar Currículo com IA</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- CV Quality Dropdown Checklist Panel -->
+      <div id="cv-quality-checklist-panel" class="cv-quality-checklist-panel hidden">
+        <div class="checklist-header">
+          <div class="checklist-header-title">
+            <i data-lucide="shield-check" style="color: var(--ui-accent);"></i>
+            <strong>Auditoria de Qualidade em Tempo Real</strong>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--ui-text-muted);">Avalia conformidade ATS, clareza para recrutadores e método STAR nas experiências</span>
+        </div>
+        <div id="cv-quality-checklist-items" class="checklist-items-grid">
+          <!-- Dynamically populated by renderCvQualityAuditor() -->
+        </div>
+      </div>
+
       <div class="workspace-container">
       
       <!-- Editor Sidebar (Left) -->
@@ -1012,6 +1057,41 @@
       <div class="modal-footer">
         <button id="btn-discard-diff" class="btn btn-secondary"><i data-lucide="trash-2"></i> Descartar Sugestões</button>
         <button id="btn-apply-diff" class="btn btn-primary"><i data-lucide="check"></i> Aplicar e Salvar no CV</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SMART IDENTITY & MERGE DETECTED -->
+  <div id="modal-identity-merge" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 540px;">
+      <div class="modal-header">
+        <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="user-check" style="color: var(--ui-accent);"></i> Identidade Correspondente Detectada</h3>
+        <button class="modal-close btn-close-modal" aria-label="Fechar"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: var(--radius-md); padding: 14px;">
+          <p style="margin: 0; font-size: 0.9rem; line-height: 1.5; color: var(--ui-text-primary);">
+            Identificamos que este currículo pertence a <strong id="merge-detected-name">Germano Roberto</strong> (<span id="merge-match-reason">mesmo e-mail</span>), que já possui um currículo salvo na biblioteca: <strong id="merge-target-cv-name">Meu Currículo</strong>.
+          </p>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--ui-text-secondary); margin: 0; line-height: 1.5;">
+          Deseja atualizar e enriquecer seu currículo existente com as novas informações do arquivo importado, ou prefere criar um arquivo novo separado?
+        </p>
+
+        <div style="background: var(--ui-surface-light); border: 1px solid var(--ui-border); border-radius: var(--radius-md); padding: 12px; font-size: 0.8rem; color: var(--ui-text-muted);">
+          <strong style="color: var(--ui-text-primary); display:block; margin-bottom: 6px;">Como funciona a Atualização Inteligente:</strong>
+          <ul style="margin: 0; padding-left: 18px; line-height: 1.6;">
+            <li>Preenche dados de contato faltantes (links, telefone, localização)</li>
+            <li>Adiciona novas experiências e projetos práticos sem duplicar os existentes</li>
+            <li>Preserva 100% de todas as suas edições manuais existentes</li>
+            <li>Consolida e unifica competências técnicas e formação</li>
+          </ul>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <button id="btn-merge-create-new" class="btn btn-secondary"><i data-lucide="file-plus"></i> Criar Nova Versão Separada</button>
+        <button id="btn-merge-update-existing" class="btn btn-primary"><i data-lucide="git-merge"></i> Atualizar e Enriquecer Existente</button>
       </div>
     </div>
   </div>

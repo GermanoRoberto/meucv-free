@@ -430,3 +430,251 @@ test("Academic Localization: English courses, fields of study and degrees are tr
   assert.strictEqual(mockCv.educations[1].end, "Set 2027");
 });
 
+test("Smart Identity Detection: detects existing CV by email, name or active CV", () => {
+  const { detectExistingIdentity, appState } = app;
+
+  appState.library = [
+    {
+      id: "cv_joao_original",
+      name: "João Silva (Exemplo)",
+      data: { name: "João Silva", email: "joao@exemplo.com" }
+    },
+    {
+      id: "cv_germano_1",
+      name: "Currículo Germano Roberto",
+      data: {
+        name: "Germano Roberto",
+        email: "germanorcarmo@gmail.com",
+        phone: "(31) 98319-9430"
+      }
+    }
+  ];
+  appState.currentCvId = "cv_germano_1";
+  appState.currentCvName = "Currículo Germano Roberto";
+  appState.currentCvData = appState.library[1].data;
+
+  // 1. Match by exact email with different case
+  const matchEmail = detectExistingIdentity({
+    name: "GERMANO R.",
+    email: "GERMANORCARMO@GMAIL.COM"
+  });
+  assert.ok(matchEmail);
+  assert.strictEqual(matchEmail.id, "cv_germano_1");
+  assert.strictEqual(matchEmail.matchReason.includes("mesmo e-mail"), true);
+
+  // 2. Match by normalized name (accents and full name containment)
+  const matchName = detectExistingIdentity({
+    name: "GERMANO ROBERTO DO CARMO SOBRINHO",
+    email: "outro_email@teste.com"
+  });
+  assert.ok(matchName);
+  assert.strictEqual(matchName.id, "cv_germano_1");
+
+  // 3. Do not match João Silva demo
+  const matchDemo = detectExistingIdentity({
+    name: "João Silva",
+    email: "joao@exemplo.com"
+  });
+  assert.strictEqual(matchDemo, null, "Should not match demo CV");
+
+  // 4. Do not match unrelated candidate
+  const matchUnrelated = detectExistingIdentity({
+    name: "Carlos Eduardo Ferreira",
+    email: "carlos.ferreira@empresa.com"
+  });
+  assert.strictEqual(matchUnrelated, null);
+});
+
+test("Intelligent Merge: preserves user edits and enriches experiences, projects, and skills", () => {
+  const { mergeCvDataIntelligently } = app;
+
+  const existing = {
+    name: "Germano Roberto",
+    title: "Analista de Suporte e Infraestrutura",
+    email: "germanorcarmo@gmail.com",
+    phone: "(31) 98319-9430",
+    location: "Belo Horizonte, MG",
+    linkedin: "https://linkedin.com/in/germano-roberto",
+    github: "", // missing
+    website: "", // missing
+    summary: "Profissional de TI com sólida atuação em suporte N1/N2/N3, redes estruturadas, administração de sistemas Windows Server e Linux.",
+    experiences: [
+      {
+        company: "Vext",
+        role: "Técnico de Suporte",
+        start: "Jan 2024",
+        end: "Presente",
+        desc: "Atendimento a chamados de suporte técnico N2."
+      }
+    ],
+    educations: [
+      {
+        institution: "Faculdade Estácio de Sá",
+        degree: "Bacharelado",
+        field: "Engenharia de Computação",
+        start: "2020",
+        end: "2024"
+      }
+    ],
+    skills: ["Windows Server", "Linux", "TCP/IP"],
+    languages: [{ name: "Inglês", level: "Intermediário" }],
+    certs: []
+  };
+
+  const incoming = {
+    name: "GERMANO ROBERTO DO CARMO SOBRINHO",
+    title: "Especialista em Redes e NOC",
+    email: "germanorcarmo@gmail.com",
+    phone: "(31) 98319-9430",
+    location: "Belo Horizonte, MG",
+    linkedin: "https://linkedin.com/in/germano-roberto",
+    github: "https://github.com/GermanoRoberto",
+    website: "https://germanoroberto.dev",
+    summary: "Resumo curto que não deve sobrescrever o bom resumo existente.",
+    experiences: [
+      {
+        company: "Vext",
+        role: "Técnico de Suporte",
+        start: "Jan 2024",
+        end: "Presente",
+        desc: "Atendimento a chamados N2 e N3, automação de rotinas em Python reduzindo tempo de resposta em 40%."
+      },
+      {
+        company: "Hospital Metropolitano",
+        role: "Analista de Suporte e Redes",
+        start: "Jan 2021",
+        end: "Dez 2023",
+        desc: "Monitoramento de infraestrutura com Zabbix e suporte a 150 servidores."
+      }
+    ],
+    educations: [
+      {
+        institution: "Faculdade Estácio de Sá",
+        degree: "Bacharelado",
+        field: "Engenharia de Computação",
+        start: "2020",
+        end: "2024"
+      }
+    ],
+    skills: ["Linux", "Python", "Docker", "Zabbix", "Firewall"],
+    languages: [{ name: "Inglês", level: "Técnico" }],
+    certs: [
+      {
+        title: "Vext Hub",
+        date: "2024",
+        desc: "Desenvolvimento de plataforma web centralizada para automação de tarefas de suporte e chamados."
+      },
+      {
+        title: "Cisco Endpoint Security",
+        date: "2023",
+        desc: "Cisco Networking Academy"
+      }
+    ]
+  };
+
+  const merged = mergeCvDataIntelligently(existing, incoming);
+
+  // 1. Core fields: Existing preserved, missing filled
+  assert.strictEqual(merged.name, "Germano Roberto");
+  assert.strictEqual(merged.github, "https://github.com/GermanoRoberto");
+  assert.strictEqual(merged.website, "https://germanoroberto.dev");
+  assert.strictEqual(merged.summary, existing.summary, "Existing rich summary must be preserved");
+
+  // 2. Experiences: Deduplication + bullet enrichment + appending new role
+  assert.strictEqual(merged.experiences.length, 2);
+  assert.strictEqual(merged.experiences[0].company, "Vext");
+  assert.strictEqual(merged.experiences[0].desc.includes("reduzindo tempo de resposta em 40%"), true, "Experience bullets enriched");
+  assert.strictEqual(merged.experiences[1].company, "Hospital Metropolitano", "New experience added");
+
+  // 3. Education: Deduplicated
+  assert.strictEqual(merged.educations.length, 1);
+
+  // 4. Skills: Union without duplicates
+  assert.strictEqual(merged.skills.includes("Windows Server"), true);
+  assert.strictEqual(merged.skills.includes("Python"), true);
+  assert.strictEqual(merged.skills.includes("Zabbix"), true);
+  // Ensure "Linux" is only present once
+  const linuxCount = merged.skills.filter(s => s.toLowerCase() === "linux").length;
+  assert.strictEqual(linuxCount, 1);
+
+  // 5. Certs & Projects: Both Vext Hub and Cisco cert preserved
+  assert.strictEqual(merged.certs.length, 2);
+  assert.strictEqual(merged.certs[0].title, "Vext Hub");
+  assert.strictEqual(merged.certs[0].desc.includes("Desenvolvimento de plataforma"), true);
+  assert.strictEqual(merged.certs[1].title, "Cisco Endpoint Security");
+});
+
+test("CV Quality Auditor: calculates 0-100 score, detects STAR action verbs and quantitative metrics", () => {
+  const { evaluateCvQualityScore } = app;
+
+  // Weak/Empty CV
+  const weakCv = {
+    name: "Candidato Teste",
+    email: "teste@teste.com",
+    experiences: [],
+    educations: [],
+    skills: []
+  };
+
+  const weakResult = evaluateCvQualityScore(weakCv);
+  assert.ok(weakResult.totalScore < 50);
+  assert.strictEqual(weakResult.ratingLevel, "low");
+  assert.strictEqual(weakResult.items.find(i => i.id === "exp_action_verbs").passed, false);
+  assert.strictEqual(weakResult.items.find(i => i.id === "exp_metrics").passed, false);
+
+  // High-performance CV
+  const strongCv = {
+    name: "Germano Roberto",
+    title: "Especialista em Redes e Infraestrutura",
+    email: "germanorcarmo@gmail.com",
+    phone: "(31) 98319-9430",
+    location: "Belo Horizonte, MG",
+    linkedin: "https://linkedin.com/in/germano-roberto",
+    github: "https://github.com/GermanoRoberto",
+    summary: "Profissional de TI com mais de 5 anos de experiência e sólida atuação em engenharia de infraestrutura, automação de sistemas, administração de redes e segurança de dados, entregando soluções escaláveis com alto padrão de qualidade e disponibilidade técnica.",
+    experiences: [
+      {
+        company: "Vext",
+        role: "Técnico de Suporte N2/N3",
+        start: "Jan 2024",
+        end: "Presente",
+        desc: "Desenvolvi scripts de automação em Python e Ansible, otimizando o tempo de resposta em 35%. Liderei equipe de 6 analistas na migração de 15 servidores."
+      }
+    ],
+    educations: [
+      {
+        institution: "Faculdade Estácio de Sá",
+        degree: "Bacharelado",
+        field: "Engenharia de Computação",
+        start: "2020",
+        end: "2024"
+      }
+    ],
+    skills: ["Python", "Docker", "Linux", "Windows Server", "Zabbix", "Ansible", "TCP/IP", "Firewall"],
+    languages: [{ name: "Inglês", level: "Intermediário" }],
+    certs: [
+      {
+        title: "Vext Hub",
+        date: "2024",
+        desc: "Plataforma web para orquestração de rotinas e monitoramento proativo."
+      },
+      {
+        title: "Cisco Endpoint Security",
+        date: "2023",
+        desc: "Cisco Networking Academy"
+      }
+    ]
+  };
+
+  const strongResult = evaluateCvQualityScore(strongCv);
+  assert.ok(strongResult.totalScore >= 85, `Score should be >= 85, got ${strongResult.totalScore}`);
+  assert.strictEqual(strongResult.ratingLevel, "high");
+  assert.strictEqual(strongResult.items.find(i => i.id === "exp_action_verbs").passed, true);
+  assert.strictEqual(strongResult.items.find(i => i.id === "exp_metrics").passed, true);
+  assert.strictEqual(strongResult.items.find(i => i.id === "contact_core").passed, true);
+  assert.strictEqual(strongResult.items.find(i => i.id === "summary_presence").passed, true);
+  assert.strictEqual(strongResult.items.find(i => i.id === "skills_density").passed, true);
+  assert.strictEqual(strongResult.items.find(i => i.id === "projects_certs_item").passed, true);
+});
+
+

@@ -381,7 +381,9 @@ let appState = {
   geminiKey: "",
   geminiModel: "gemini-2.5-flash",
   googleToken: "",
-  library: []
+  library: [],
+  pendingImportData: null,
+  pendingMergeTarget: null
 };
 
 let pendingChange = null;
@@ -1310,6 +1312,73 @@ function setupEventListeners() {
       toggleLinkedinOptimization();
     }
   });
+
+  // CV Quality Checklist Dropdown Toggle
+  const btnToggleQuality = document.getElementById("btn-toggle-quality-checklist");
+  if (btnToggleQuality) {
+    btnToggleQuality.addEventListener("click", () => {
+      const panel = document.getElementById("cv-quality-checklist-panel");
+      const icon = document.getElementById("icon-toggle-quality");
+      if (panel) {
+        panel.classList.toggle("hidden");
+        const isHidden = panel.classList.contains("hidden");
+        if (icon) {
+          icon.style.transform = isHidden ? "rotate(0deg)" : "rotate(180deg)";
+        }
+      }
+    });
+  }
+
+  // 1-Click Full CV AI Optimizer
+  const btnOptimizeFullCv = document.getElementById("btn-optimize-full-cv");
+  if (btnOptimizeFullCv) {
+    btnOptimizeFullCv.addEventListener("click", () => {
+      optimizeEntireCvWithAI();
+    });
+  }
+
+  // Identity Merge: Update Existing
+  const btnMergeUpdateExisting = document.getElementById("btn-merge-update-existing");
+  if (btnMergeUpdateExisting) {
+    btnMergeUpdateExisting.addEventListener("click", () => {
+      if (!appState.pendingImportData || !appState.pendingMergeTarget) return;
+      const targetId = appState.pendingMergeTarget.id;
+      const targetCv = appState.library.find(c => String(c.id) === String(targetId));
+      if (targetCv) {
+        const mergedData = mergeCvDataIntelligently(targetCv.data, appState.pendingImportData);
+        targetCv.data = mergedData;
+        targetCv.lastModified = new Date().toISOString();
+        selectActiveCv(targetId, true);
+        saveLibrary();
+        showToast(`Currículo de ${appState.pendingImportData.name || "candidato"} atualizado e enriquecido com sucesso!`, "success");
+      }
+      appState.pendingImportData = null;
+      appState.pendingMergeTarget = null;
+      closeAllModals();
+      switchView("editor");
+    });
+  }
+
+  // Identity Merge: Create New Separate
+  const btnMergeCreateNew = document.getElementById("btn-merge-create-new");
+  if (btnMergeCreateNew) {
+    btnMergeCreateNew.addEventListener("click", () => {
+      if (!appState.pendingImportData) return;
+      const parsedData = appState.pendingImportData;
+      const createdId = createNewCv(`Importado - ${parsedData.name || "Sem Nome"}`, true);
+      if (createdId) {
+        appState.currentCvData = parsedData;
+        saveActiveCvStateToLibrary();
+        fillFormFromState();
+        renderCv();
+        showToast("Novo currículo criado separadamente com sucesso!", "success");
+      }
+      appState.pendingImportData = null;
+      appState.pendingMergeTarget = null;
+      closeAllModals();
+      switchView("editor");
+    });
+  }
 }
 
 
@@ -2071,8 +2140,244 @@ function renderCv() {
   `;
 
   
-  lucide.createIcons();
+  if (window.lucide && typeof lucide.createIcons === "function") {
+    lucide.createIcons();
+  }
+  renderCvQualityAuditor();
 }
+
+
+function evaluateCvQualityScore(cvData) {
+  const cv = cvData || {};
+  let contactScore = 0;
+  let summaryScore = 0;
+  let expScore = 0;
+  let eduScore = 0;
+  let skillsScore = 0;
+
+  const items = [];
+
+  // --- 1. Contact (Max 20) ---
+  const hasName = !!(cv.name && cv.name.trim().length >= 3);
+  const hasEmail = !!(cv.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cv.email.trim()));
+  const hasPhone = !!(cv.phone && cv.phone.trim().length >= 8);
+  const hasLocation = !!(cv.location && cv.location.trim().length >= 3);
+  const hasLink = !!((cv.linkedin && cv.linkedin.trim().length >= 4) || (cv.github && cv.github.trim().length >= 4) || (cv.website && cv.website.trim().length >= 4));
+
+  if (hasName) contactScore += 4;
+  if (hasEmail) contactScore += 4;
+  if (hasPhone) contactScore += 4;
+  if (hasLocation) contactScore += 4;
+  if (hasLink) contactScore += 4;
+
+  items.push({
+    id: "contact_core",
+    category: "contact",
+    label: "Dados Essenciais de Contato",
+    passed: hasName && hasEmail && hasPhone,
+    tip: hasName && hasEmail && hasPhone ? "Nome, e-mail e telefone preenchidos corretamente." : "Preencha nome completo, e-mail válido e telefone para contato direto dos recrutadores."
+  });
+
+  items.push({
+    id: "contact_links",
+    category: "contact",
+    label: "Links Profissionais (LinkedIn / GitHub / Portfólio)",
+    passed: hasLink,
+    tip: hasLink ? "Perfil profissional verificado presente no cabeçalho." : "Adicione seu LinkedIn ou GitHub para aumentar a credibilidade e validação do seu histórico."
+  });
+
+  // --- 2. Summary (Max 25) ---
+  const summaryText = (cv.summary || "").trim();
+  const summaryLen = summaryText.length;
+  const hasSummary = summaryLen >= 30;
+  const isSummaryIdealLength = summaryLen >= 140 && summaryLen <= 650;
+  
+  const summaryKeywords = ["experiência", "desenvolvimento", "projetos", "atuação", "especialista", "gestão", "liderança", "foco", "resultados", "soluções", "tecnologia", "engenharia", "infraestrutura", "segurança", "automação", "sistemas", "análise"];
+  const summaryMatches = summaryKeywords.filter(kw => summaryText.toLowerCase().includes(kw));
+  const hasSummaryValue = summaryMatches.length >= 2;
+
+  if (hasSummary) summaryScore += 5;
+  if (isSummaryIdealLength) summaryScore += 10;
+  else if (summaryLen >= 60) summaryScore += 5;
+  if (hasSummaryValue) summaryScore += 10;
+  else if (summaryMatches.length >= 1) summaryScore += 5;
+
+  items.push({
+    id: "summary_presence",
+    category: "summary",
+    label: "Resumo Profissional Estruturado (3 a 5 linhas)",
+    passed: isSummaryIdealLength,
+    tip: isSummaryIdealLength ? "Resumo com tamanho e densidade ideais para triagem rápida." : (summaryLen < 140 ? "Seu resumo está muito curto. Escreva 3 a 5 linhas destacando suas principais especialidades e conquistas." : "Seu resumo está muito extenso. Resuma em até 5 linhas para garantir leitura ágil.")
+  });
+
+  // --- 3. Experiences & STAR Method (Max 25) ---
+  const experiences = Array.isArray(cv.experiences) ? cv.experiences : [];
+  const hasExp = experiences.length >= 1;
+  if (hasExp) expScore += 5;
+
+  const actionVerbs = [
+    "desenvolvi", "liderei", "implementei", "estruturei", "otimizei", "automatizei", "criei", 
+    "coordenei", "reduzi", "aumentei", "projetei", "integrei", "migrei", "configurei", 
+    "administrei", "gerenciei", "auditei", "desenvolvimento", "liderança", "implementação", 
+    "automação", "otimização", "suporte", "manutenção", "análise"
+  ];
+
+  let totalVerbsFound = 0;
+  let hasQuantMetrics = false;
+  const metricRegex = /(\d+[\.,]?\d*%|\b\d{2,}\b|r\$|\$|\bhoras\b|\bminutos\b|\bdias\b|\bmeses\b|\busuários\b|\bservidores\b|\bdispositivos\b|\bequipes\b)/i;
+
+  experiences.forEach(exp => {
+    const desc = (exp.desc || "").toLowerCase();
+    actionVerbs.forEach(v => {
+      if (desc.includes(v)) totalVerbsFound++;
+    });
+    if (metricRegex.test(desc)) {
+      hasQuantMetrics = true;
+    }
+  });
+
+  if (totalVerbsFound >= 3) expScore += 10;
+  else if (totalVerbsFound >= 1) expScore += 5;
+
+  if (hasQuantMetrics) expScore += 10;
+  else if (totalVerbsFound >= 2) expScore += 5;
+
+  items.push({
+    id: "exp_action_verbs",
+    category: "experience",
+    label: "Verbos de Ação Fortes (Metodologia STAR)",
+    passed: totalVerbsFound >= 3,
+    tip: totalVerbsFound >= 3 ? "Realizações iniciadas com verbos fortes de impacto." : "Use verbos de ação no pretérito (ex: 'Desenvolvi', 'Liderei', 'Automatizei', 'Otimizei') no início de cada conquista."
+  });
+
+  items.push({
+    id: "exp_metrics",
+    category: "experience",
+    label: "Métricas e Resultados Quantificados (%, números)",
+    passed: hasQuantMetrics,
+    tip: hasQuantMetrics ? "Presença comprovada de métricas e indicadores de impacto." : "Inclua dados quantitativos nas experiências (ex: 'redução de 30% em chamados', 'gestão de 150 servidores'). Recrutadores valorizam impacto mensurável."
+  });
+
+  // --- 4. Education & Languages (Max 15) ---
+  const educations = Array.isArray(cv.educations) ? cv.educations : [];
+  const hasEdu = educations.length >= 1 && educations.some(e => e.institution && (e.field || e.degree));
+  const hasEduDates = educations.some(e => e.start || e.end);
+  const languages = Array.isArray(cv.languages) ? cv.languages : [];
+  const hasLang = languages.length >= 1;
+
+  if (hasEdu) eduScore += 10;
+  if (hasEduDates) eduScore += 3;
+  if (hasLang) eduScore += 2;
+
+  items.push({
+    id: "edu_complete",
+    category: "education",
+    label: "Formação Acadêmica e Idiomas",
+    passed: hasEdu && hasEduDates,
+    tip: (hasEdu && hasEduDates) ? "Formação acadêmica preenchida com instituição, curso e períodos." : "Informe instituição de ensino, graduação/curso e anos de início e conclusão."
+  });
+
+  // --- 5. Skills & Projects (Max 15) ---
+  const skills = Array.isArray(cv.skills) ? cv.skills : [];
+  const certs = Array.isArray(cv.certs) ? cv.certs : [];
+  const hasEnoughSkills = skills.length >= 5;
+  const hasProjectsOrCerts = certs.length >= 1;
+
+  if (skills.length >= 8) skillsScore += 8;
+  else if (skills.length >= 5) skillsScore += 6;
+  else if (skills.length >= 1) skillsScore += 3;
+
+  if (certs.length >= 2) skillsScore += 7;
+  else if (certs.length === 1) skillsScore += 5;
+
+  items.push({
+    id: "skills_density",
+    category: "skills",
+    label: "Competências Técnicas Chave (Mínimo 5)",
+    passed: hasEnoughSkills,
+    tip: hasEnoughSkills ? `Excelente densidade de competências técnicas (${skills.length} cadastradas).` : "Liste pelo menos 5 competências e tecnologias dominadas para leitura assertiva por robôs ATS."
+  });
+
+  items.push({
+    id: "projects_certs_item",
+    category: "skills",
+    label: "Projetos Práticos ou Certificações",
+    passed: hasProjectsOrCerts,
+    tip: hasProjectsOrCerts ? "Certificados e/ou projetos práticos cadastrados com sucesso." : "Adicione projetos autorais de software, automações ou certificações profissionais para se destacar da concorrência."
+  });
+
+  const totalScore = Math.min(100, Math.max(0, contactScore + summaryScore + expScore + eduScore + skillsScore));
+
+  let ratingLevel = "high";
+  let ratingLabel = "Excelente padrão ATS & RH";
+  if (totalScore < 60) {
+    ratingLevel = "low";
+    ratingLabel = "Incompleto - Requer melhorias";
+  } else if (totalScore < 80) {
+    ratingLevel = "medium";
+    ratingLabel = "Bom - Requer ajustes finos";
+  }
+
+  return {
+    totalScore,
+    ratingLevel,
+    ratingLabel,
+    categoryScores: {
+      contact: contactScore,
+      summary: summaryScore,
+      experience: expScore,
+      education: eduScore,
+      skills: skillsScore
+    },
+    items
+  };
+}
+
+function renderCvQualityAuditor() {
+  const badge = document.getElementById("cv-quality-score-badge");
+  const label = document.getElementById("cv-quality-status-label");
+  const itemsContainer = document.getElementById("cv-quality-checklist-items");
+
+  if (!badge || !label) return;
+
+  const result = evaluateCvQualityScore(appState.currentCvData);
+
+  badge.innerText = `${result.totalScore}/100`;
+  badge.className = `quality-score-badge ${result.ratingLevel}`;
+  label.innerText = result.ratingLabel;
+
+  const setPill = (id, name, score, max) => {
+    const pill = document.getElementById(id);
+    if (!pill) return;
+    pill.innerText = `${name}: ${score}/${max}`;
+    pill.className = `quality-pill ${score >= max * 0.75 ? "passed" : "warn"}`;
+  };
+
+  setPill("pill-contact", "Contato", result.categoryScores.contact, 20);
+  setPill("pill-summary", "Resumo", result.categoryScores.summary, 25);
+  setPill("pill-exp", "Experiências", result.categoryScores.experience, 25);
+  setPill("pill-edu", "Formação", result.categoryScores.education, 15);
+  setPill("pill-skills", "Skills", result.categoryScores.skills, 15);
+
+  if (itemsContainer) {
+    itemsContainer.innerHTML = result.items.map(item => `
+      <div class="checklist-card-item ${item.passed ? "pass" : "fail"}">
+        <div class="checklist-card-icon">
+          <i data-lucide="${item.passed ? "check-circle-2" : "alert-circle"}" style="width: 16px; height: 16px; color: ${item.passed ? "var(--ui-success)" : "var(--ui-warning)"};"></i>
+        </div>
+        <div class="checklist-card-body">
+          <strong>${escapeHtml(item.label)}</strong>
+          <span>${escapeHtml(item.tip)}</span>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  if (window.lucide && typeof lucide.createIcons === "function") {
+    lucide.createIcons();
+  }
+}
+
 
 
 async function runLocalATSAnalysis() {
@@ -2668,6 +2973,358 @@ async function handlePdfUpload(file) {
   }
 }
 
+function detectExistingIdentity(parsedData) {
+  if (!parsedData) return null;
+  const newEmail = (parsedData.email || "").trim().toLowerCase();
+  
+  const normalize = (str) => {
+    return (str || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, " ");
+  };
+
+  const newName = normalize(parsedData.name);
+  if (!newEmail && (!newName || newName.length < 4)) return null;
+
+  const isNameMatch = (nameA, nameB) => {
+    if (!nameA || !nameB) return false;
+    if (nameA === nameB) return true;
+    const partsA = nameA.split(" ").filter(p => p.length > 2);
+    const partsB = nameB.split(" ").filter(p => p.length > 2);
+    if (partsA.length >= 2 && partsB.length >= 2) {
+      if (partsA[0] === partsB[0] && partsA[partsA.length - 1] === partsB[partsB.length - 1]) {
+        return true;
+      }
+    }
+    if (nameA.length >= 8 && nameB.length >= 8) {
+      if (nameA.includes(nameB) || nameB.includes(nameA)) return true;
+    }
+    return false;
+  };
+
+  // 1. Check active CV if not sample test
+  if (appState.currentCvData && appState.currentCvId !== "cv_joao_original") {
+    const curEmail = (appState.currentCvData.email || "").trim().toLowerCase();
+    const curName = normalize(appState.currentCvData.name);
+
+    if (newEmail && curEmail && newEmail === curEmail) {
+      return {
+        id: appState.currentCvId,
+        name: appState.currentCvName,
+        data: appState.currentCvData,
+        matchReason: `mesmo e-mail cadastrado (${newEmail})`
+      };
+    }
+    if (isNameMatch(newName, curName)) {
+      return {
+        id: appState.currentCvId,
+        name: appState.currentCvName,
+        data: appState.currentCvData,
+        matchReason: `mesmo titular (${parsedData.name})`
+      };
+    }
+  }
+
+  // 2. Check throughout library
+  if (Array.isArray(appState.library)) {
+    for (const cv of appState.library) {
+      if (cv.id === "cv_joao_original") continue;
+      const cvData = cv.data || {};
+      const cvEmail = (cvData.email || "").trim().toLowerCase();
+      const cvName = normalize(cvData.name || cv.name);
+
+      if (newEmail && cvEmail && newEmail === cvEmail) {
+        return {
+          id: cv.id,
+          name: cv.name,
+          data: cvData,
+          matchReason: `mesmo e-mail cadastrado (${newEmail})`
+        };
+      }
+      if (isNameMatch(newName, cvName)) {
+        return {
+          id: cv.id,
+          name: cv.name,
+          data: cvData,
+          matchReason: `mesmo titular (${parsedData.name})`
+        };
+      }
+    }
+  }
+
+  return null;
+}
+
+function mergeCvDataIntelligently(existing, incoming) {
+  if (!existing || typeof existing !== "object") return incoming;
+  if (!incoming || typeof incoming !== "object") return existing;
+
+  const result = JSON.parse(JSON.stringify(existing));
+
+  // 1. Contact / Core Header fields: fill if missing/empty
+  const contactFields = ["name", "title", "email", "phone", "location", "linkedin", "github", "website"];
+  contactFields.forEach(field => {
+    if (!result[field] || String(result[field]).trim() === "") {
+      if (incoming[field] && String(incoming[field]).trim() !== "") {
+        result[field] = String(incoming[field]).trim();
+      }
+    }
+  });
+
+  // 2. Professional Summary
+  const curSummary = (result.summary || "").trim();
+  const incSummary = (incoming.summary || "").trim();
+  if (!curSummary && incSummary) {
+    result.summary = incSummary;
+  } else if (curSummary.length < 60 && incSummary.length >= 60) {
+    result.summary = incSummary;
+  }
+
+  // 3. Work Experiences: Deduplicate by company & role, enrich descriptions, append new ones
+  result.experiences = Array.isArray(result.experiences) ? result.experiences : [];
+  const incExps = Array.isArray(incoming.experiences) ? incoming.experiences : [];
+
+  const norm = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  incExps.forEach(newExp => {
+    const newComp = norm(newExp.company);
+    const newRole = norm(newExp.role);
+
+    const match = result.experiences.find(exp => {
+      const eComp = norm(exp.company);
+      const eRole = norm(exp.role);
+      const compMatch = newComp && eComp && (newComp === eComp || newComp.includes(eComp) || eComp.includes(newComp));
+      const roleMatch = newRole && eRole && (newRole === eRole || newRole.includes(eRole) || eRole.includes(newRole));
+      return compMatch && roleMatch;
+    });
+
+    if (match) {
+      if (!match.start && newExp.start) match.start = newExp.start;
+      if (!match.end && newExp.end) match.end = newExp.end;
+
+      if (!match.desc && newExp.desc) {
+        match.desc = newExp.desc;
+      } else if (newExp.desc && (newExp.desc.length > (match.desc || "").length + 30)) {
+        match.desc = newExp.desc;
+      }
+    } else {
+      result.experiences.push(JSON.parse(JSON.stringify(newExp)));
+    }
+  });
+
+  // 4. Educations: Deduplicate by institution & field/degree
+  result.educations = Array.isArray(result.educations) ? result.educations : [];
+  const incEdus = Array.isArray(incoming.educations) ? incoming.educations : [];
+
+  incEdus.forEach(newEdu => {
+    const newInst = norm(newEdu.institution);
+    const newField = norm(newEdu.field);
+
+    const match = result.educations.find(edu => {
+      const eInst = norm(edu.institution);
+      const eField = norm(edu.field);
+      return (newInst && eInst && (newInst === eInst || newInst.includes(eInst) || eInst.includes(newInst))) ||
+             (newField && eField && newField === eField);
+    });
+
+    if (match) {
+      if (!match.degree && newEdu.degree) match.degree = newEdu.degree;
+      if (!match.field && newEdu.field) match.field = newEdu.field;
+      if (!match.start && newEdu.start) match.start = newEdu.start;
+      if (!match.end && newEdu.end) match.end = newEdu.end;
+      if (!match.desc && newEdu.desc) match.desc = newEdu.desc;
+    } else {
+      result.educations.push(JSON.parse(JSON.stringify(newEdu)));
+    }
+  });
+
+  // 5. Skills: Deduplicated set union
+  result.skills = Array.isArray(result.skills) ? result.skills : [];
+  const incSkills = Array.isArray(incoming.skills) ? incoming.skills : [];
+  const existingSkillSet = new Set(result.skills.map(s => String(s).trim().toLowerCase()));
+
+  incSkills.forEach(s => {
+    const raw = String(s).trim();
+    const key = raw.toLowerCase();
+    if (key && !existingSkillSet.has(key)) {
+      result.skills.push(raw);
+      existingSkillSet.add(key);
+    }
+  });
+
+  // 6. Languages: Deduplicate by name
+  result.languages = Array.isArray(result.languages) ? result.languages : [];
+  const incLangs = Array.isArray(incoming.languages) ? incoming.languages : [];
+
+  incLangs.forEach(newL => {
+    const newName = norm(newL.name);
+    const match = result.languages.find(l => norm(l.name) === newName);
+    if (!match) {
+      result.languages.push(JSON.parse(JSON.stringify(newL)));
+    } else if (!match.level && newL.level) {
+      match.level = newL.level;
+    }
+  });
+
+  // 7. Certifications & Projects: Deduplicate by title
+  result.certs = Array.isArray(result.certs) ? result.certs : [];
+  const incCerts = Array.isArray(incoming.certs) ? incoming.certs : [];
+
+  incCerts.forEach(newC => {
+    const newTitle = norm(newC.title);
+    const match = result.certs.find(c => norm(c.title) === newTitle);
+    if (!match) {
+      result.certs.push(JSON.parse(JSON.stringify(newC)));
+    } else {
+      if (!match.desc && newC.desc) match.desc = newC.desc;
+      if ((!match.date || match.date === "N/A") && newC.date && newC.date !== "N/A") match.date = newC.date;
+    }
+  });
+
+  normalizeCvData(result);
+  return result;
+}
+
+async function optimizeEntireCvWithAI() {
+  const hasOwnKey = !!appState.geminiKey;
+  const isLogged = !!appState.googleToken;
+  if (!hasOwnKey && !isLogged) {
+    showModal("modal-login-required");
+    return;
+  }
+
+  const btn = document.getElementById("btn-optimize-full-cv");
+  const origHtml = btn ? btn.innerHTML : "";
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner" style="width: 12px; height: 12px; display: inline-block;"></span> IA Otimizando...';
+  }
+
+  const cv = appState.currentCvData;
+
+  const prompt = `
+    Você é um especialista em recrutamento executivo e engenharia de currículos compatíveis com sistemas ATS (Applicant Tracking Systems).
+    Sua missão é aprimorar o currículo abaixo para o mais alto padrão executivo do mercado de trabalho brasileiro (pt-BR).
+
+    DIRETRIZES DE EXCELÊNCIA OBRIGATÓRIAS:
+    1. PRESERVAÇÃO DE FATOS: Preserve 100% de empresas, datas, instituições de ensino, cargos reais e dados de contato. Jamais invente experiências inexistentes.
+    2. RESUMO PROFISSIONAL DE ALTO IMPACTO:
+       - Estruture um resumo executivo objetivo de 3 a 5 linhas destacando competências fundamentais, área de atuação e proposta de valor.
+    3. EXPERIÊNCIAS E METODOLOGIA STAR:
+       - Reescreva os bullet points de cada experiência profissional no padrão STAR (Situação, Tarefa, Ação e Resultado).
+       - Inicie cada bullet com verbos fortes de ação no pretérito perfeito (Desenvolvi, Liderei, Automatizei, Otimizei, Implementei, Estruturei, Reduzi, Projetei).
+       - Destaque métricas, volumes e tecnologias reais identificadas no contexto.
+    4. HABILIDADES TÉCNICAS E PROJETOS:
+       - Mantenha e consolide a lista de habilidades, eliminando repetições.
+       - Preserve todos os projetos e certificações existentes na chave "certs".
+    5. IDIOMA 100% PORTUGUÊS DO BRASIL:
+       - Termos acadêmicos em inglês devem ser traduzidos para a nomenclatura oficial brasileira (ex: Bacharelado em Engenharia de Computação).
+       - As datas devem estar em português (ex: Jan 2023 - Presente).
+    6. RETORNO OBRIGATÓRIO EM JSON:
+       - Retorne APENAS um JSON válido contendo exatamente as chaves abaixo:
+       {
+         "explanation": "Explicação pedagógica e clara das otimizações realizadas...",
+         "optimizedCv": {
+           "name": "${cv.name || ""}",
+           "title": "${cv.title || ""}",
+           "email": "${cv.email || ""}",
+           "phone": "${cv.phone || ""}",
+           "location": "${cv.location || ""}",
+           "linkedin": "${cv.linkedin || ""}",
+           "github": "${cv.github || ""}",
+           "website": "${cv.website || ""}",
+           "summary": "...",
+           "experiences": [
+             {
+               "company": "...",
+               "role": "...",
+               "start": "...",
+               "end": "...",
+               "desc": "..."
+             }
+           ],
+           "educations": [
+             {
+               "institution": "...",
+               "degree": "...",
+               "field": "...",
+               "start": "...",
+               "end": "...",
+               "desc": "..."
+             }
+           ],
+           "skills": ["..."],
+           "languages": [
+             {
+               "name": "...",
+               "level": "..."
+             }
+           ],
+           "certs": [
+             {
+               "title": "...",
+               "date": "...",
+               "desc": "..."
+             }
+           ]
+         }
+       }
+
+    DADOS ATUAIS DO CURRÍCULO:
+    ${JSON.stringify(cv, null, 2)}
+  `;
+
+  try {
+    const rawResponse = await callGeminiAPI(prompt);
+    let cleanJson = rawResponse.trim()
+      .replace(/^```json/, "")
+      .replace(/^```/, "")
+      .replace(/```$/, "")
+      .trim();
+
+    const parsedData = JSON.parse(cleanJson);
+    if (!parsedData.optimizedCv) {
+      throw new Error("Formato de resposta inválido retornado pela IA.");
+    }
+
+    normalizeCvData(parsedData.optimizedCv);
+
+    const origSummary = cv.summary || "Sem resumo definido.";
+    const optSummary = parsedData.optimizedCv.summary || "";
+
+    const origExps = (cv.experiences || []).map(e => `[${e.role} @ ${e.company}]\n${e.desc || ""}`).join("\n\n");
+    const optExps = (parsedData.optimizedCv.experiences || []).map(e => `[${e.role} @ ${e.company}]\n${e.desc || ""}`).join("\n\n");
+
+    pendingChange = {
+      type: "cv",
+      index: null,
+      originalText: `=== RESUMO PROFISSIONAL ===\n${origSummary}\n\n=== EXPERIÊNCIAS ===\n${origExps}`,
+      optimizedText: `=== RESUMO OTIMIZADO ===\n${optSummary}\n\n=== EXPERIÊNCIAS OTIMIZADAS (MÉTODO STAR) ===\n${optExps}`,
+      explanation: parsedData.explanation || "Estruturação aprimorada com verbos de ação STAR, resumo executivo de alta conversão e padronização ATS.",
+      optimizedCv: parsedData.optimizedCv
+    };
+
+    document.getElementById("diff-original-content").innerText = pendingChange.originalText;
+    document.getElementById("diff-optimized-content").innerText = pendingChange.optimizedText;
+    document.getElementById("diff-explanation").innerHTML = parseMarkdownToHtml(pendingChange.explanation);
+
+    showModal("modal-diff");
+
+  } catch (err) {
+    showToast("Erro ao otimizar currículo com IA: " + err.message, "danger");
+    console.error(err);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    }
+  }
+}
+
 async function processRawTextImport() {
   const text = document.getElementById("raw-cv-text").value.trim();
   if (!text) {
@@ -2709,7 +3366,7 @@ async function processRawTextImport() {
     3. Identifique as seções principais: Dados de Contato, Resumo Profissional, Experiência Profissional, Educação, Habilidades, Idiomas, e Certificados/Projetos.
     4. RESUMO PROFISSIONAL: Caso o currículo original não possua um resumo ou tenha um resumo fraco, estruture um resumo objetivo de 3 a 5 linhas baseado estritamente na área e experiências informadas no texto.
     5. EXPERIÊNCIA PROFISSIONAL: Estruture os bullets das experiências usando verbos de ação fortes no início (Desenvolvi, Liderei, Reduzi, Otimizei, Automatizei), mantendo métricas originais quando presentes.
-    6. Na chave "certs", extraia TODOS os Certificados, Cursos Livres e Projetos listados no texto.
+    6. PROJETOS AUTORAIS E CERTIFICADOS: Na chave "certs", extraia TODOS os Certificados, Cursos Livres e Projetos de Software/Automação listados no texto (como 'Vext Hub', sistemas internos, NOC, repositórios, ferramentas). Se for um projeto, coloque o nome do projeto em 'title', ano ou período em 'date', e na descrição 'desc' detalhe as tecnologias utilizadas e o impacto.
     7. LOCALIZAÇÃO E IDIOMA OBRIGATÓRIO (PORTUGUÊS DO BRASIL): O resultado JSON deve estar 100% em Português do Brasil (pt-BR). Se o texto original extraído de PDFs ou do LinkedIn contiver termos acadêmicos em inglês padrão da plataforma (como 'Computer Engineering', 'Computer Science', 'Software Engineering', 'Bachelor', etc.), converta-os obrigatoriamente para a nomenclatura brasileira ('Engenharia de Computação', 'Ciência da Computação', 'Engenharia de Software', 'Bacharelado', etc.). As datas devem estar em português (ex: Jan 2021, Presente).
     8. Retorne APENAS um objeto JSON válido contendo exatamente as chaves abaixo. Não inclua markdown, aspas extras fora do JSON, ou qualquer texto adicional.
 
@@ -2776,9 +3433,26 @@ async function processRawTextImport() {
     const parsedData = JSON.parse(cleanJson);
     normalizeCvData(parsedData);
     
+    // Check if imported CV matches an existing identity in library or active state
+    const matchingCv = detectExistingIdentity(parsedData);
+    if (matchingCv) {
+      appState.pendingImportData = parsedData;
+      appState.pendingMergeTarget = matchingCv;
+
+      const elDetected = document.getElementById("merge-detected-name");
+      const elReason = document.getElementById("merge-match-reason");
+      const elTarget = document.getElementById("merge-target-cv-name");
+      if (elDetected) elDetected.innerText = parsedData.name || "Candidato";
+      if (elReason) elReason.innerText = matchingCv.matchReason;
+      if (elTarget) elTarget.innerText = matchingCv.name;
+
+      closeAllModals();
+      showModal("modal-identity-merge");
+      return;
+    }
+
     const createdId = createNewCv(`Importado - ${parsedData.name || "Sem Nome"}`);
     if (!createdId) {
-      // Usuário não autenticado e modal de login exibido; aborta sem sobrescrever currículo ativo
       return;
     }
     
@@ -2805,20 +3479,16 @@ async function processRawTextImport() {
 function fallbackRegexParse(text) {
   const data = JSON.parse(JSON.stringify(DEFAULT_CV_DATA)); 
   
-  
   data.experiences = [];
   data.educations = [];
   data.skills = [];
   data.languages = [];
   data.certs = [];
   
-  
   const lines = text.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-  
   
   if (lines.length > 0) data.name = lines[0];
   if (lines.length > 1) data.title = lines[1];
-  
   
   const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
   if (emailMatch) data.email = emailMatch[1];
@@ -2826,9 +3496,7 @@ function fallbackRegexParse(text) {
   const phoneMatch = text.match(/(\(?\d{2}\)?\s?\d{4,5}[-.\s]?\d{4})/);
   if (phoneMatch) data.phone = phoneMatch[1];
   
-  
   data.summary = text.slice(0, 400) + "... (Texto importado manualmente. Ative sua chave IA para estruturação perfeita)";
-  
   
   data.experiences.push({
     company: "Empresa Importada",
@@ -2838,6 +3506,26 @@ function fallbackRegexParse(text) {
     desc: text.slice(0, 1000)
   });
   
+  normalizeCvData(data);
+
+  // Check identity match even in fallback mode
+  const matchingCv = detectExistingIdentity(data);
+  if (matchingCv) {
+    appState.pendingImportData = data;
+    appState.pendingMergeTarget = matchingCv;
+
+    const elDetected = document.getElementById("merge-detected-name");
+    const elReason = document.getElementById("merge-match-reason");
+    const elTarget = document.getElementById("merge-target-cv-name");
+    if (elDetected) elDetected.innerText = data.name || "Candidato";
+    if (elReason) elReason.innerText = matchingCv.matchReason;
+    if (elTarget) elTarget.innerText = matchingCv.name;
+
+    closeAllModals();
+    showModal("modal-identity-merge");
+    return;
+  }
+
   createNewCv("Importado Manualmente", true);
   appState.currentCvData = data;
   saveActiveCvStateToLibrary();
@@ -4139,6 +4827,11 @@ if (typeof window !== "undefined") {
   window.normalizeCvData = normalizeCvData;
   window.translateAcademicFieldPt = translateAcademicFieldPt;
   window.translateAcademicDegreePt = translateAcademicDegreePt;
+  window.detectExistingIdentity = detectExistingIdentity;
+  window.mergeCvDataIntelligently = mergeCvDataIntelligently;
+  window.evaluateCvQualityScore = evaluateCvQualityScore;
+  window.renderCvQualityAuditor = renderCvQualityAuditor;
+  window.optimizeEntireCvWithAI = optimizeEntireCvWithAI;
 }
 
 if (typeof module !== "undefined" && module.exports) {
@@ -4156,6 +4849,11 @@ if (typeof module !== "undefined" && module.exports) {
     normalizeCvData,
     translateAcademicFieldPt,
     translateAcademicDegreePt,
+    detectExistingIdentity,
+    mergeCvDataIntelligently,
+    evaluateCvQualityScore,
+    renderCvQualityAuditor,
+    optimizeEntireCvWithAI,
     parseCSV,
     DEFAULT_CV_DATA
   };
