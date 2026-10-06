@@ -63,6 +63,13 @@ global.document = {
   querySelector: () => null,
   addEventListener: () => {}
 };
+const storage = new Map();
+global.localStorage = {
+  getItem: (k) => (storage.has(k) ? storage.get(k) : null),
+  setItem: (k, v) => storage.set(k, String(v)),
+  removeItem: (k) => storage.delete(k),
+  clear: () => storage.clear()
+};
 
 const app = require("../app.js");
 
@@ -691,4 +698,83 @@ test("Universal multi-user: loadLibrary preserves any user CV regardless of cand
   assert.strictEqual(ids.includes("cv_user_bruno"), true, "Must keep Bruno's CV");
   assert.strictEqual(ids.includes("cv_user_qualquer"), true, "Must keep any imported CV");
   assert.strictEqual(app.appState.library.length, 3);
+});
+
+test("Storage Persistence: unauthenticated user can create, edit, save and reload active CV", () => {
+  const store = {};
+  global.localStorage = {
+    getItem: k => (k in store ? store[k] : null),
+    setItem: (k, v) => { store[k] = String(v); },
+    removeItem: k => { delete store[k]; }
+  };
+  
+  // Clear any auth credentials
+  app.appState.googleToken = null;
+  app.appState.geminiKey = null;
+  app.appState.library = [];
+  app.appState.currentCvId = null;
+
+  // 1. Create a new CV locally without login
+  const newId = app.createNewCv("Currículo de Mariana Lima");
+  assert.ok(newId, "CV ID should be generated");
+  assert.strictEqual(app.appState.currentCvId, newId, "Active CV should be the newly created one");
+  assert.strictEqual(store.meucv_active_cv_id, newId, "Active CV ID must be persisted in localStorage");
+
+  // 2. Edit active CV data
+  app.appState.currentCvData.name = "Mariana Lima";
+  app.appState.currentCvData.title = "Engenheira de Software";
+  app.appState.currentCvData.email = "mariana@exemplo.com";
+  app.appState.currentCvData.skills = ["Node.js", "TypeScript", "Docker"];
+  app.saveActiveCvStateToLibrary();
+
+  // Verify persistence in localStorage
+  const savedLib = JSON.parse(store.meucv_library);
+  const savedCv = savedLib.find(c => c.id === newId);
+  assert.ok(savedCv, "CV must be saved in localStorage meucv_library");
+  assert.strictEqual(savedCv.data.name, "Mariana Lima");
+  assert.deepStrictEqual(savedCv.data.skills, ["Node.js", "TypeScript", "Docker"]);
+
+  // 3. Simulate browser refresh: reset in-memory state and call loadLibrary()
+  app.appState.currentCvId = null;
+  app.appState.currentCvName = "";
+  app.appState.currentCvData = null;
+  app.appState.library = [];
+
+  app.loadLibrary();
+
+  // Active CV should be restored from meucv_active_cv_id
+  assert.strictEqual(app.appState.currentCvId, newId, "Active CV ID must be restored after page reload");
+  assert.strictEqual(app.appState.currentCvData.name, "Mariana Lima", "Active CV data must be restored");
+  assert.strictEqual(app.appState.currentCvData.title, "Engenheira de Software");
+  assert.deepStrictEqual(app.appState.currentCvData.skills, ["Node.js", "TypeScript", "Docker"]);
+});
+
+test("Select Active CV: persists active CV ID and restores correctly", () => {
+  const store = {};
+  global.localStorage = {
+    getItem: k => (k in store ? store[k] : null),
+    setItem: (k, v) => { store[k] = String(v); },
+    removeItem: k => { delete store[k]; }
+  };
+  
+  app.appState.googleToken = null;
+  app.appState.geminiKey = null;
+
+  const cv1 = { id: "cv_1", name: "CV 1", lastModified: new Date().toISOString(), data: { name: "Pessoa 1" } };
+  const cv2 = { id: "cv_2", name: "CV 2", lastModified: new Date().toISOString(), data: { name: "Pessoa 2" } };
+  app.appState.library = [cv1, cv2];
+  app.saveLibrary();
+
+  // Select CV 2
+  app.selectActiveCv("cv_2");
+  assert.strictEqual(app.appState.currentCvId, "cv_2");
+  assert.strictEqual(store.meucv_active_cv_id, "cv_2");
+
+  // Reload library
+  app.appState.currentCvId = null;
+  app.appState.currentCvData = null;
+  app.loadLibrary();
+
+  assert.strictEqual(app.appState.currentCvId, "cv_2", "Should restore cv_2 as active CV");
+  assert.strictEqual(app.appState.currentCvData.name, "Pessoa 2");
 });

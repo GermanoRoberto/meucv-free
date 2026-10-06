@@ -398,6 +398,10 @@ if (typeof document !== "undefined") {
   document.addEventListener("DOMContentLoaded", () => {
     loadConfig();
     loadLibrary();
+    if (appState.currentCvData) {
+      fillFormFromState();
+      renderCv();
+    }
     if (window.lucide && typeof lucide.createIcons === "function") lucide.createIcons();
     setupEventListeners();
     setupFormSync();
@@ -610,7 +614,7 @@ function handleGoogleLogout() {
 
 
 function loadLibrary() {
-  const rawLib = localStorage.getItem("meucv_library");
+  const rawLib = typeof localStorage !== "undefined" ? localStorage.getItem("meucv_library") : null;
   if (rawLib) {
     try {
       
@@ -625,13 +629,11 @@ function loadLibrary() {
     }
   }
   
-  
   const originalCvName = "João Silva - Exemplo Tech";
   const hasOriginal = appState.library.some(c => c.name === originalCvName || c.id === "cv_joao_original");
   const hasUserCv = appState.library.some(c => c.id !== "cv_joao_original");
   
   if (hasUserCv) {
-    
     appState.library = appState.library.filter(c => c.id !== "cv_joao_original");
     saveLibrary();
   } else if (!hasOriginal) {
@@ -646,11 +648,15 @@ function loadLibrary() {
     saveLibrary();
   }
   
-  
-  if (!appState.currentCvId && appState.library.length > 0) {
-    appState.currentCvId = appState.library[0].id;
-    appState.currentCvName = appState.library[0].name;
-    appState.currentCvData = JSON.parse(JSON.stringify(appState.library[0].data));
+  const savedActiveId = typeof localStorage !== "undefined" ? localStorage.getItem("meucv_active_cv_id") : null;
+  const targetCv = (savedActiveId && appState.library.find(c => String(c.id) === String(savedActiveId))) || appState.library[0];
+  if (targetCv) {
+    appState.currentCvId = targetCv.id;
+    appState.currentCvName = targetCv.name;
+    appState.currentCvData = JSON.parse(JSON.stringify(targetCv.data));
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("meucv_active_cv_id", targetCv.id);
+    }
   }
   if (appState.currentCvData) {
     normalizeCvData(appState.currentCvData);
@@ -658,23 +664,29 @@ function loadLibrary() {
 }
 
 function saveLibrary() {
-  localStorage.setItem("meucv_library", JSON.stringify(appState.library));
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem("meucv_library", JSON.stringify(appState.library));
+  }
 }
 
-function selectActiveCv(id, force = false) {
-  const isTestCv = id === "cv_joao_original";
-  const hasOwnKey = !!appState.geminiKey;
-  const isLogged = !!appState.googleToken;
-  
-  if (!force && !isTestCv && !hasOwnKey && !isLogged) {
-    showModal("modal-login-required");
-    return;
+function indicateSavedStatus(message = "Salvo no navegador") {
+  const el = document.querySelector(".save-status");
+  if (!el) return;
+  el.innerHTML = `<i data-lucide="check-circle-2"></i> ${message}`;
+  el.style.opacity = "1";
+  if (window.lucide && typeof lucide.createIcons === "function") {
+    lucide.createIcons();
   }
+}
 
+function selectActiveCv(id) {
   const cvItem = appState.library.find(c => String(c.id) === String(id));
   if (cvItem) {
     appState.currentCvId = cvItem.id;
     appState.currentCvName = cvItem.name;
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("meucv_active_cv_id", cvItem.id);
+    }
     let dataObj = null;
     try {
       dataObj = cvItem.data ? JSON.parse(JSON.stringify(cvItem.data)) : null;
@@ -683,7 +695,6 @@ function selectActiveCv(id, force = false) {
     }
     
     if (!dataObj) {
-      
       dataObj = {
         name: cvItem.name || "",
         title: cvItem.title || "",
@@ -709,7 +720,6 @@ function selectActiveCv(id, force = false) {
     }
     appState.currentCvData = dataObj;
     
-    
     const d = appState.currentCvData;
     if (!d.experiences || !Array.isArray(d.experiences)) d.experiences = [];
     if (!d.educations || !Array.isArray(d.educations)) d.educations = [];
@@ -718,10 +728,10 @@ function selectActiveCv(id, force = false) {
     if (!d.certs || !Array.isArray(d.certs)) d.certs = [];
     normalizeCvData(d);
     
-    
-    document.getElementById("input-cv-name").value = appState.currentCvName;
-    document.getElementById("select-template").value = cvItem.template || "classic";
-    
+    const inputName = document.getElementById("input-cv-name");
+    if (inputName) inputName.value = appState.currentCvName;
+    const selectTmpl = document.getElementById("select-template");
+    if (selectTmpl) selectTmpl.value = cvItem.template || "classic";
     
     document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
     document.querySelectorAll(".workspace-pane").forEach(pane => pane.classList.remove("active"));
@@ -730,12 +740,12 @@ function selectActiveCv(id, force = false) {
     const defaultPane = document.getElementById("workspace-editor");
     if (defaultPane) defaultPane.classList.add("active");
     
-    
     fillFormFromState();
     renderCv();
-    
-    
-    lucide.createIcons();
+    indicateSavedStatus();
+    if (window.lucide && typeof lucide.createIcons === "function") {
+      lucide.createIcons();
+    }
   }
 }
 
@@ -743,23 +753,31 @@ function saveActiveCvStateToLibrary() {
   if (!appState.currentCvId) return;
   normalizeCvData(appState.currentCvData);
   const index = appState.library.findIndex(c => String(c.id) === String(appState.currentCvId));
+  const tmplSelect = document.getElementById("select-template");
+  const templateVal = tmplSelect ? tmplSelect.value : "classic";
+
   if (index !== -1) {
     appState.library[index].name = appState.currentCvName;
     appState.library[index].lastModified = new Date().toISOString();
     appState.library[index].data = JSON.parse(JSON.stringify(appState.currentCvData));
-    appState.library[index].template = document.getElementById("select-template").value;
-    saveLibrary();
+    appState.library[index].template = templateVal;
+  } else {
+    appState.library.push({
+      id: appState.currentCvId,
+      name: appState.currentCvName || "Novo Currículo",
+      lastModified: new Date().toISOString(),
+      template: templateVal,
+      data: JSON.parse(JSON.stringify(appState.currentCvData))
+    });
   }
+  saveLibrary();
+  if (typeof localStorage !== "undefined") {
+    localStorage.setItem("meucv_active_cv_id", appState.currentCvId);
+  }
+  indicateSavedStatus();
 }
 
-function createNewCv(name = "Novo Currículo", force = false) {
-  const hasOwnKey = !!appState.geminiKey;
-  const isLogged = !!appState.googleToken;
-  if (!force && !hasOwnKey && !isLogged) {
-    showModal("modal-login-required");
-    return null;
-  }
-  
+function createNewCv(name = "Novo Currículo") {
   const newId = "cv_" + Date.now();
   const newCv = {
     id: newId,
@@ -787,7 +805,7 @@ function createNewCv(name = "Novo Currículo", force = false) {
   appState.library = appState.library.filter(c => c.id !== "cv_joao_original");
   appState.library.push(newCv);
   saveLibrary();
-  selectActiveCv(newId, force);
+  selectActiveCv(newId);
   showToast("Novo currículo criado!", "success");
   return newId;
 }
@@ -827,32 +845,35 @@ function deleteCv(id) {
 function setupEventListeners() {
   
   document.getElementById("btn-create-new").addEventListener("click", () => {
-    const hasOwnKey = !!appState.geminiKey;
-    const isLogged = !!appState.googleToken;
-    if (!hasOwnKey && !isLogged) {
-      showModal("modal-login-required");
-      return;
-    }
     switchView("editor");
-    createNewCv("Novo Currículo Otimizado");
+    createNewCv("Novo Currículo");
   });
   
   document.getElementById("btn-back-dashboard").addEventListener("click", () => {
     switchView("landing");
   });
 
-  
   const btnOpenDemo = document.getElementById("btn-open-demo-cv");
   if (btnOpenDemo) {
     btnOpenDemo.addEventListener("click", () => {
-      
+      let demoCv = appState.library.find(c => c.id === "cv_joao_original");
+      if (!demoCv) {
+        demoCv = {
+          id: "cv_joao_original",
+          name: "João Silva - Exemplo Tech",
+          lastModified: new Date().toISOString(),
+          template: "creative",
+          data: JSON.parse(JSON.stringify(DEFAULT_CV_DATA))
+        };
+        appState.library.unshift(demoCv);
+        saveLibrary();
+      }
       selectActiveCv("cv_joao_original");
       switchView("editor");
-      showToast("Modo de testes ativo! Sinta-se à vontade para editar e testar a IA no currículo de exemplo.", "success");
+      showToast("Modo de testes ativo! Sinta-se à vontade para editar o currículo de exemplo.", "success");
     });
   }
 
-  
   const openSettingsModal = () => {
     showModal("modal-settings");
   };
@@ -875,12 +896,6 @@ function setupEventListeners() {
   }
 
   document.getElementById("btn-trigger-import-pdf").addEventListener("click", () => {
-    const hasOwnKey = !!appState.geminiKey;
-    const isLogged = !!appState.googleToken;
-    if (!hasOwnKey && !isLogged) {
-      showModal("modal-login-required");
-      return;
-    }
     showModal("modal-import-pdf");
     resetPDFImportModal();
   });
@@ -1410,6 +1425,10 @@ function switchView(viewName) {
       } else {
         createNewCv();
       }
+    } else {
+      fillFormFromState();
+      renderCv();
+      indicateSavedStatus();
     }
   }
 }
@@ -1460,37 +1479,34 @@ function showToast(message, type = "primary") {
 
 function renderLibraryGrid() {
   const grid = document.getElementById("cv-library-grid");
+  if (!grid) return;
   grid.innerHTML = "";
-  
-  const hasOwnKey = !!appState.geminiKey;
-  const isLogged = !!appState.googleToken;
-  const canManage = hasOwnKey || isLogged;
   
   const toolbar = document.querySelector(".library-toolbar");
   if (toolbar) {
-    toolbar.style.display = canManage ? "flex" : "none";
+    toolbar.style.display = "flex";
+  }
+  
+  if (!appState.library || appState.library.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--ui-text-muted); padding: 30px;">Nenhum currículo salvo no momento.</div>';
+    return;
   }
   
   appState.library.forEach(cv => {
-    const isTestCv = cv.id === "cv_joao_original";
-    if (!isTestCv && !canManage) {
-      return;
-    }
-    
     const card = document.createElement("div");
     card.className = "cv-lib-card";
     
-    const dateFormatted = new Date(cv.lastModified).toLocaleDateString("pt-BR", {
+    const dateFormatted = cv.lastModified ? new Date(cv.lastModified).toLocaleDateString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit"
-    });
+    }) : "Recente";
     
     card.innerHTML = `
       <div class="cv-lib-info">
-        <h4>${cv.name}</h4>
+        <h4>${cv.name || "Currículo Sem Nome"}</h4>
         <div class="cv-lib-date"><i data-lucide="clock"></i> Modificado em: ${dateFormatted}</div>
       </div>
       <div class="cv-lib-actions">
@@ -1502,7 +1518,9 @@ function renderLibraryGrid() {
     grid.appendChild(card);
   });
   
-  lucide.createIcons();
+  if (window.lucide && typeof lucide.createIcons === "function") {
+    lucide.createIcons();
+  }
   
   
   grid.querySelectorAll(".btn-load").forEach(b => {
@@ -1532,7 +1550,17 @@ function setupFormSync() {
     }, 300);
     
     el.addEventListener("input", (e) => {
+      if (!appState.currentCvData) {
+        appState.currentCvData = {};
+      }
       appState.currentCvData[stateKey] = e.target.value;
+      if (stateKey === "name" && e.target.value.trim()) {
+        const curName = document.getElementById("input-cv-name");
+        if (curName && (!appState.currentCvName || appState.currentCvName === "Novo Currículo" || appState.currentCvName === "Novo Currículo Otimizado" || appState.currentCvName === "Currículo Sem Nome")) {
+          appState.currentCvName = `Currículo - ${e.target.value.trim()}`;
+          curName.value = appState.currentCvName;
+        }
+      }
       debouncedSaveAndRender();
     });
   };
@@ -4871,6 +4899,10 @@ if (typeof module !== "undefined" && module.exports) {
     optimizeEntireCvWithAI,
     parseCSV,
     loadLibrary,
+    saveLibrary,
+    selectActiveCv,
+    createNewCv,
+    saveActiveCvStateToLibrary,
     DEFAULT_CV_DATA
   };
 }
