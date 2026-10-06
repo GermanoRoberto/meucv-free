@@ -2810,7 +2810,7 @@ async function adaptCvToJobWithAI() {
        - Foque sempre em impacto, dados e números reais (ex: "Aumentei a retenção de clientes em 30% ao implementar...", "Liderei equipe de X pessoas e reduzi o tempo de produção em Y%").
        - NUNCA use frases passivas ou puramente genéricas (como "Responsável por campanhas de marketing" ou "Responsável por suporte"). Explique a ação e o resultado obtido.
        - Use verbos de ação fortes no início das conquistas (Desenvolvi, Liderei, Otimizei, Implementou, Automatizou, Reduziu, Economizou).
-    4. PRESERVAÇÃO E ADAPTAÇÃO DE PROJETOS E INICIATIVAS DE DESTAQUE: Nunca remova, oculte ou ignore projetos autorais, iniciativas de destaque, pesquisas ou ferramentas de autoria própria (como 'Vext Hub'). Reescreva a descrição detalhada dessas iniciativas (bullets) adaptando-as para ressaltar a aplicação prática de competências e o uso de palavras-chaves que gerem valor para a vaga de trabalho pretendida (por exemplo, correlacionando-os com as necessidades técnicas ou processos descritos na vaga).
+    4. PRESERVAÇÃO E ADAPTAÇÃO DE PROJETOS E INICIATIVAS DE DESTAQUE: Nunca remova, oculte ou ignore projetos autorais, iniciativas de destaque, pesquisas, ferramentas ou plataformas desenvolvidas pelo candidato. Reescreva a descrição detalhada dessas iniciativas (bullets) adaptando-as para ressaltar a aplicação prática de competências e o uso de palavras-chaves que gerem valor para a vaga de trabalho pretendida (por exemplo, correlacionando-os com as necessidades técnicas ou processos descritos na vaga).
     5. PRESERVAÇÃO DE HABILIDADES DIFERENCIAIS: Se o candidato possui competências avançadas, especializações profundas, metodologias diferenciadas ou conhecimentos inovadores (como técnicas de segurança cibernética, engenharia de prompt, liderança ou ferramentas tecnológicas), essas habilidades devem ser preservadas e integradas de forma prática e estratégica no Resumo Profissional, nas Habilidades e nas Experiências, demonstrando seu uso no dia a dia da nova função.
     6. CERTIFICADOS, CURSOS E PROJETOS DETALHADOS (certs): Mantenha todos os certificados, cursos e projetos do candidato. Nunca copie descrições de projetos complexos verbatim (palavra por palavra) sem fazer a devida adaptação de contexto e vocabulário alinhados à vaga de emprego. Conecte cada projeto ou certificado de forma inteligente com os requisitos técnicos do cargo.
     7. REGRA ABSOLUTA DE IDIOMA E LOCALIZAÇÃO (PORTUGUÊS DO BRASIL):
@@ -2856,7 +2856,7 @@ async function adaptCvToJobWithAI() {
           {
             "title": "Nome do certificado ou projeto (não mude o nome do projeto)",
             "date": "ano (não mude)",
-            "desc": "Para projetos (como Vext Hub), reescreva as realizações e bullets adaptando-as e inserindo palavras-chave relevantes da vaga de trabalho. Para certificados, adicione uma descrição detalhada do escopo do aprendizado conectado de forma estratégica à vaga."
+            "desc": "Para projetos práticos ou autorais, reescreva as realizações e bullets adaptando-as e inserindo palavras-chave relevantes da vaga de trabalho. Para certificados, adicione uma descrição detalhada do escopo do aprendizado conectado de forma estratégica à vaga."
           }
         ]
       }
@@ -3381,7 +3381,7 @@ async function processRawTextImport() {
     3. Identifique as seções principais: Dados de Contato, Resumo Profissional, Experiência Profissional, Educação, Habilidades, Idiomas, e Certificados/Projetos.
     4. RESUMO PROFISSIONAL: Caso o currículo original não possua um resumo ou tenha um resumo fraco, estruture um resumo objetivo de 3 a 5 linhas baseado estritamente na área e experiências informadas no texto.
     5. EXPERIÊNCIA PROFISSIONAL: Estruture os bullets das experiências usando verbos de ação fortes no início (Desenvolvi, Liderei, Reduzi, Otimizei, Automatizei), mantendo métricas originais quando presentes.
-    6. PROJETOS AUTORAIS E CERTIFICADOS: Na chave "certs", extraia TODOS os Certificados, Cursos Livres e Projetos de Software/Automação listados no texto (como 'Vext Hub', sistemas internos, NOC, repositórios, ferramentas). Se for um projeto, coloque o nome do projeto em 'title', ano ou período em 'date', e na descrição 'desc' detalhe as tecnologias utilizadas e o impacto.
+    6. PROJETOS AUTORAIS E CERTIFICADOS: Na chave "certs", extraia TODOS os Certificados, Cursos Livres e Projetos de Software/Automação/Engenharia listados no texto (sistemas internos, ferramentas, plataformas, repositórios). Se for um projeto, coloque o nome do projeto em 'title', ano ou período em 'date', e na descrição 'desc' detalhe as tecnologias utilizadas e o impacto real.
     7. LOCALIZAÇÃO E IDIOMA OBRIGATÓRIO (PORTUGUÊS DO BRASIL): O resultado JSON deve estar 100% em Português do Brasil (pt-BR). Se o texto original extraído de PDFs ou do LinkedIn contiver termos acadêmicos em inglês padrão da plataforma (como 'Computer Engineering', 'Computer Science', 'Software Engineering', 'Bachelor', etc.), converta-os obrigatoriamente para a nomenclatura brasileira ('Engenharia de Computação', 'Ciência da Computação', 'Engenharia de Software', 'Bacharelado', etc.). As datas devem estar em português (ex: Jan 2021, Presente).
     8. Retorne APENAS um objeto JSON válido contendo exatamente as chaves abaixo. Não inclua markdown, aspas extras fora do JSON, ou qualquer texto adicional.
 
@@ -3674,7 +3674,7 @@ async function analyzeLinkedinWithAI() {
             </div>
           </div>
           
-          <p class="analysis-card-text">Olá, [Nome do Candidato]! [Breve introdução motivadora e focada nos diferenciais dele, como o projeto Vext Hub ou infraestrutura, se aplicável].</p>
+          <p class="analysis-card-text">Olá, [Nome do Candidato]! [Breve introdução motivadora e focada nos diferenciais dele, como projetos autorais, liderança ou infraestrutura/desenvolvimento, conforme a trajetória real dele].</p>
           
           <!-- CARD 1: TITULO -->
           <div class="analysis-card">
@@ -3709,7 +3709,7 @@ async function analyzeLinkedinWithAI() {
                 <span class="filename">sugestao_sobre_linkedin.txt</span>
                 <span class="badge">Pronto para Copiar</span>
               </div>
-              <div class="analysis-copy-box-body">[Escreva o texto completo do resumo profissional sugerido para a seção Sobre do LinkedIn dele, pronto para copiar, integrando o Vext Hub e as conquistas dele de forma profissional]</div>
+              <div class="analysis-copy-box-body">[Escreva o texto completo do resumo profissional sugerido para a seção Sobre do LinkedIn dele, pronto para copiar, integrando as principais conquistas e competências dele de forma profissional]</div>
             </div>
             <p class="analysis-footnote">Nota: Esta é uma sugestão personalizada com base no seu perfil atual para agilizar seu ajuste, que você pode refinar conforme seu gosto pessoal.</p>
           </div>

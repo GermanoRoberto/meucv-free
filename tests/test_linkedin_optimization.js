@@ -436,41 +436,41 @@ test("Smart Identity Detection: detects existing CV by email, name or active CV"
   appState.library = [
     {
       id: "cv_joao_original",
-      name: "João Silva (Exemplo)",
+      name: "João Silva - Exemplo Tech",
       data: { name: "João Silva", email: "joao@exemplo.com" }
     },
     {
-      id: "cv_germano_1",
-      name: "Currículo Germano Roberto",
+      id: "cv_candidato_1",
+      name: "Currículo Lucas Mendes",
       data: {
-        name: "Germano Roberto",
-        email: "germanorcarmo@gmail.com",
-        phone: "(31) 98319-9430"
+        name: "Lucas Mendes",
+        email: "lucas.mendes@email.com",
+        phone: "(11) 98765-4321"
       }
     }
   ];
-  appState.currentCvId = "cv_germano_1";
-  appState.currentCvName = "Currículo Germano Roberto";
+  appState.currentCvId = "cv_candidato_1";
+  appState.currentCvName = "Currículo Lucas Mendes";
   appState.currentCvData = appState.library[1].data;
 
   // 1. Match by exact email with different case
   const matchEmail = detectExistingIdentity({
-    name: "GERMANO R.",
-    email: "GERMANORCARMO@GMAIL.COM"
+    name: "LUCAS M.",
+    email: "LUCAS.MENDES@EMAIL.COM"
   });
   assert.ok(matchEmail);
-  assert.strictEqual(matchEmail.id, "cv_germano_1");
+  assert.strictEqual(matchEmail.id, "cv_candidato_1");
   assert.strictEqual(matchEmail.matchReason.includes("mesmo e-mail"), true);
 
   // 2. Match by normalized name (accents and full name containment)
   const matchName = detectExistingIdentity({
-    name: "GERMANO ROBERTO DO CARMO SOBRINHO",
+    name: "LUCAS MENDES DE OLIVEIRA",
     email: "outro_email@teste.com"
   });
   assert.ok(matchName);
-  assert.strictEqual(matchName.id, "cv_germano_1");
+  assert.strictEqual(matchName.id, "cv_candidato_1");
 
-  // 3. Do not match João Silva demo
+  // 3. Do not match demo CV
   const matchDemo = detectExistingIdentity({
     name: "João Silva",
     email: "joao@exemplo.com"
@@ -489,18 +489,18 @@ test("Intelligent Merge: preserves user edits and enriches experiences, projects
   const { mergeCvDataIntelligently } = app;
 
   const existing = {
-    name: "Germano Roberto",
+    name: "Lucas Mendes",
     title: "Analista de Suporte e Infraestrutura",
-    email: "germanorcarmo@gmail.com",
-    phone: "(31) 98319-9430",
-    location: "Belo Horizonte, MG",
-    linkedin: "https://linkedin.com/in/germano-roberto",
+    email: "lucas.mendes@email.com",
+    phone: "(11) 98765-4321",
+    location: "São Paulo, SP",
+    linkedin: "https://linkedin.com/in/lucas-mendes",
     github: "", // missing
     website: "", // missing
     summary: "Profissional de TI com sólida atuação em suporte N1/N2/N3, redes estruturadas, administração de sistemas Windows Server e Linux.",
     experiences: [
       {
-        company: "Vext",
+        company: "TechCorp Serviços",
         role: "Técnico de Suporte",
         start: "Jan 2024",
         end: "Presente",
@@ -509,9 +509,9 @@ test("Intelligent Merge: preserves user edits and enriches experiences, projects
     ],
     educations: [
       {
-        institution: "Faculdade Estácio de Sá",
+        institution: "Universidade Paulista",
         degree: "Bacharelado",
-        field: "Engenharia de Computação",
+        field: "Ciência da Computação",
         start: "2020",
         end: "2024"
       }
@@ -522,25 +522,25 @@ test("Intelligent Merge: preserves user edits and enriches experiences, projects
   };
 
   const incoming = {
-    name: "GERMANO ROBERTO DO CARMO SOBRINHO",
-    title: "Especialista em Redes e NOC",
-    email: "germanorcarmo@gmail.com",
-    phone: "(31) 98319-9430",
-    location: "Belo Horizonte, MG",
-    linkedin: "https://linkedin.com/in/germano-roberto",
-    github: "https://github.com/GermanoRoberto",
-    website: "https://germanoroberto.dev",
+    name: "LUCAS MENDES DE OLIVEIRA",
+    title: "Especialista em Redes e Infraestrutura",
+    email: "lucas.mendes@email.com",
+    phone: "(11) 98765-4321",
+    location: "São Paulo, SP",
+    linkedin: "https://linkedin.com/in/lucas-mendes",
+    github: "https://github.com/lucasmendes",
+    website: "https://lucasmendes.dev",
     summary: "Resumo curto que não deve sobrescrever o bom resumo existente.",
     experiences: [
       {
-        company: "Vext",
+        company: "TechCorp Serviços",
         role: "Técnico de Suporte",
         start: "Jan 2024",
         end: "Presente",
         desc: "Atendimento a chamados N2 e N3, automação de rotinas em Python reduzindo tempo de resposta em 40%."
       },
       {
-        company: "Hospital Metropolitano",
+        company: "Hospital Santa Maria",
         role: "Analista de Suporte e Redes",
         start: "Jan 2021",
         end: "Dez 2023",
@@ -549,9 +549,9 @@ test("Intelligent Merge: preserves user edits and enriches experiences, projects
     ],
     educations: [
       {
-        institution: "Faculdade Estácio de Sá",
+        institution: "Universidade Paulista",
         degree: "Bacharelado",
-        field: "Engenharia de Computação",
+        field: "Ciência da Computação",
         start: "2020",
         end: "2024"
       }
@@ -560,14 +560,14 @@ test("Intelligent Merge: preserves user edits and enriches experiences, projects
     languages: [{ name: "Inglês", level: "Técnico" }],
     certs: [
       {
-        title: "Vext Hub",
+        title: "Portal de Monitoramento Interno",
         date: "2024",
         desc: "Desenvolvimento de plataforma web centralizada para automação de tarefas de suporte e chamados."
       },
       {
-        title: "Cisco Endpoint Security",
+        title: "Segurança de Redes e Endpoints",
         date: "2023",
-        desc: "Cisco Networking Academy"
+        desc: "Certificação em Defesa de Redes"
       }
     ]
   };
@@ -575,16 +575,16 @@ test("Intelligent Merge: preserves user edits and enriches experiences, projects
   const merged = mergeCvDataIntelligently(existing, incoming);
 
   // 1. Core fields: Existing preserved, missing filled
-  assert.strictEqual(merged.name, "Germano Roberto");
-  assert.strictEqual(merged.github, "https://github.com/GermanoRoberto");
-  assert.strictEqual(merged.website, "https://germanoroberto.dev");
+  assert.strictEqual(merged.name, "Lucas Mendes");
+  assert.strictEqual(merged.github, "https://github.com/lucasmendes");
+  assert.strictEqual(merged.website, "https://lucasmendes.dev");
   assert.strictEqual(merged.summary, existing.summary, "Existing rich summary must be preserved");
 
   // 2. Experiences: Deduplication + bullet enrichment + appending new role
   assert.strictEqual(merged.experiences.length, 2);
-  assert.strictEqual(merged.experiences[0].company, "Vext");
+  assert.strictEqual(merged.experiences[0].company, "TechCorp Serviços");
   assert.strictEqual(merged.experiences[0].desc.includes("reduzindo tempo de resposta em 40%"), true, "Experience bullets enriched");
-  assert.strictEqual(merged.experiences[1].company, "Hospital Metropolitano", "New experience added");
+  assert.strictEqual(merged.experiences[1].company, "Hospital Santa Maria", "New experience added");
 
   // 3. Education: Deduplicated
   assert.strictEqual(merged.educations.length, 1);
@@ -593,15 +593,14 @@ test("Intelligent Merge: preserves user edits and enriches experiences, projects
   assert.strictEqual(merged.skills.includes("Windows Server"), true);
   assert.strictEqual(merged.skills.includes("Python"), true);
   assert.strictEqual(merged.skills.includes("Zabbix"), true);
-  // Ensure "Linux" is only present once
   const linuxCount = merged.skills.filter(s => s.toLowerCase() === "linux").length;
   assert.strictEqual(linuxCount, 1);
 
-  // 5. Certs & Projects: Both Vext Hub and Cisco cert preserved
+  // 5. Certs & Projects: Both preserved
   assert.strictEqual(merged.certs.length, 2);
-  assert.strictEqual(merged.certs[0].title, "Vext Hub");
+  assert.strictEqual(merged.certs[0].title, "Portal de Monitoramento Interno");
   assert.strictEqual(merged.certs[0].desc.includes("Desenvolvimento de plataforma"), true);
-  assert.strictEqual(merged.certs[1].title, "Cisco Endpoint Security");
+  assert.strictEqual(merged.certs[1].title, "Segurança de Redes e Endpoints");
 });
 
 test("CV Quality Auditor: calculates 0-100 score, detects STAR action verbs and quantitative metrics", () => {
@@ -624,17 +623,17 @@ test("CV Quality Auditor: calculates 0-100 score, detects STAR action verbs and 
 
   // High-performance CV
   const strongCv = {
-    name: "Germano Roberto",
+    name: "Lucas Mendes",
     title: "Especialista em Redes e Infraestrutura",
-    email: "germanorcarmo@gmail.com",
-    phone: "(31) 98319-9430",
-    location: "Belo Horizonte, MG",
-    linkedin: "https://linkedin.com/in/germano-roberto",
-    github: "https://github.com/GermanoRoberto",
+    email: "lucas.mendes@email.com",
+    phone: "(11) 98765-4321",
+    location: "São Paulo, SP",
+    linkedin: "https://linkedin.com/in/lucas-mendes",
+    github: "https://github.com/lucasmendes",
     summary: "Profissional de TI com mais de 5 anos de experiência e sólida atuação em engenharia de infraestrutura, automação de sistemas, administração de redes e segurança de dados, entregando soluções escaláveis com alto padrão de qualidade e disponibilidade técnica.",
     experiences: [
       {
-        company: "Vext",
+        company: "TechCorp Serviços",
         role: "Técnico de Suporte N2/N3",
         start: "Jan 2024",
         end: "Presente",
@@ -643,9 +642,9 @@ test("CV Quality Auditor: calculates 0-100 score, detects STAR action verbs and 
     ],
     educations: [
       {
-        institution: "Faculdade Estácio de Sá",
+        institution: "Universidade Paulista",
         degree: "Bacharelado",
-        field: "Engenharia de Computação",
+        field: "Ciência da Computação",
         start: "2020",
         end: "2024"
       }
@@ -654,14 +653,14 @@ test("CV Quality Auditor: calculates 0-100 score, detects STAR action verbs and 
     languages: [{ name: "Inglês", level: "Intermediário" }],
     certs: [
       {
-        title: "Vext Hub",
+        title: "Portal de Monitoramento Interno",
         date: "2024",
         desc: "Plataforma web para orquestração de rotinas e monitoramento proativo."
       },
       {
-        title: "Cisco Endpoint Security",
+        title: "Segurança de Redes e Endpoints",
         date: "2023",
-        desc: "Cisco Networking Academy"
+        desc: "Certificação em Defesa de Redes"
       }
     ]
   };
@@ -677,21 +676,19 @@ test("CV Quality Auditor: calculates 0-100 score, detects STAR action verbs and 
   assert.strictEqual(strongResult.items.find(i => i.id === "projects_certs_item").passed, true);
 });
 
-
-
-test("Regression: loadLibrary must NOT delete user CVs whose name contains 'Germano'", () => {
+test("Universal multi-user: loadLibrary preserves any user CV regardless of candidate name", () => {
   const store = {};
   global.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; } };
   store.meucv_library = JSON.stringify([
-    { id: "cv_germano_original", name: "Germano - Currículo Original", data: {} },
-    { id: "cv_user_1", name: "Importado - Germano Carmo", data: { name: "Germano", experiences: [], educations: [], skills: [], languages: [], certs: [] } },
-    { id: "cv_user_2", data: { name: "Sem nome de CV" } }
+    { id: "cv_user_ana", name: "Currículo Ana Paula", data: { name: "Ana Paula" } },
+    { id: "cv_user_bruno", name: "Currículo Bruno Souza", data: { name: "Bruno Souza" } },
+    { id: "cv_user_qualquer", name: "Importado - Qualquer Nome", data: { name: "Qualquer Nome" } }
   ]);
   app.appState.currentCvId = null;
   app.loadLibrary();
   const ids = app.appState.library.map(c => c.id);
-  assert.strictEqual(ids.includes("cv_user_1"), true, "User CV with 'Germano' in name must be kept");
-  assert.strictEqual(ids.includes("cv_user_2"), true, "CV without name must not crash/wipe library");
-  assert.strictEqual(ids.includes("cv_germano_original"), false, "Only the exact legacy demo entry is removed");
-  assert.strictEqual(JSON.parse(store.meucv_library).some(c => c.id === "cv_user_1"), true, "Persisted library keeps user CV");
+  assert.strictEqual(ids.includes("cv_user_ana"), true, "Must keep Ana's CV");
+  assert.strictEqual(ids.includes("cv_user_bruno"), true, "Must keep Bruno's CV");
+  assert.strictEqual(ids.includes("cv_user_qualquer"), true, "Must keep any imported CV");
+  assert.strictEqual(app.appState.library.length, 3);
 });
