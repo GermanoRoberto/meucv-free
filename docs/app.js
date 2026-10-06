@@ -614,10 +614,11 @@ function loadLibrary() {
   if (rawLib) {
     try {
       
-      appState.library = JSON.parse(rawLib).filter(c => 
-        c.id !== "cv_germano_original" && 
-        c.name !== "Germano - Currículo Original" &&
-        !c.name.includes("Germano")
+      // Remove apenas o antigo CV de demonstração legado (id/nome exatos).
+      // NUNCA filtrar por substring do nome: isso apagava CVs reais de usuários.
+      appState.library = JSON.parse(rawLib).filter(c =>
+        c && c.id !== "cv_germano_original" &&
+        c.name !== "Germano - Currículo Original"
       );
     } catch (e) {
       appState.library = [];
@@ -2143,9 +2144,22 @@ function renderCv() {
   if (window.lucide && typeof lucide.createIcons === "function") {
     lucide.createIcons();
   }
-  renderCvQualityAuditor();
+  // O auditor é puramente informativo: nunca pode interromper renderização nem salvamento
+  try {
+    renderCvQualityAuditor();
+  } catch (err) {
+    console.error("Falha no auditor de qualidade (ignorada):", err);
+  }
 }
 
+
+// Converte qualquer valor (string, array, número, null) em texto seguro
+function toPlainText(value) {
+  if (value === null || value === undefined) return "";
+  if (Array.isArray(value)) return value.map(toPlainText).join("\n");
+  if (typeof value === "object") return "";
+  return String(value);
+}
 
 function evaluateCvQualityScore(cvData) {
   const cv = cvData || {};
@@ -2156,13 +2170,14 @@ function evaluateCvQualityScore(cvData) {
   let skillsScore = 0;
 
   const items = [];
+  const txt = (v) => toPlainText(v).trim();
 
   // --- 1. Contact (Max 20) ---
-  const hasName = !!(cv.name && cv.name.trim().length >= 3);
-  const hasEmail = !!(cv.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cv.email.trim()));
-  const hasPhone = !!(cv.phone && cv.phone.trim().length >= 8);
-  const hasLocation = !!(cv.location && cv.location.trim().length >= 3);
-  const hasLink = !!((cv.linkedin && cv.linkedin.trim().length >= 4) || (cv.github && cv.github.trim().length >= 4) || (cv.website && cv.website.trim().length >= 4));
+  const hasName = txt(cv.name).length >= 3;
+  const hasEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(txt(cv.email));
+  const hasPhone = txt(cv.phone).length >= 8;
+  const hasLocation = txt(cv.location).length >= 3;
+  const hasLink = txt(cv.linkedin).length >= 4 || txt(cv.github).length >= 4 || txt(cv.website).length >= 4;
 
   if (hasName) contactScore += 4;
   if (hasEmail) contactScore += 4;
@@ -2187,7 +2202,7 @@ function evaluateCvQualityScore(cvData) {
   });
 
   // --- 2. Summary (Max 25) ---
-  const summaryText = (cv.summary || "").trim();
+  const summaryText = txt(cv.summary);
   const summaryLen = summaryText.length;
   const hasSummary = summaryLen >= 30;
   const isSummaryIdealLength = summaryLen >= 140 && summaryLen <= 650;
@@ -2227,7 +2242,7 @@ function evaluateCvQualityScore(cvData) {
   const metricRegex = /(\d+[\.,]?\d*%|\b\d{2,}\b|r\$|\$|\bhoras\b|\bminutos\b|\bdias\b|\bmeses\b|\busuários\b|\bservidores\b|\bdispositivos\b|\bequipes\b)/i;
 
   experiences.forEach(exp => {
-    const desc = (exp.desc || "").toLowerCase();
+    const desc = txt(exp.desc).toLowerCase();
     actionVerbs.forEach(v => {
       if (desc.includes(v)) totalVerbsFound++;
     });
@@ -2260,8 +2275,8 @@ function evaluateCvQualityScore(cvData) {
 
   // --- 4. Education & Languages (Max 15) ---
   const educations = Array.isArray(cv.educations) ? cv.educations : [];
-  const hasEdu = educations.length >= 1 && educations.some(e => e.institution && (e.field || e.degree));
-  const hasEduDates = educations.some(e => e.start || e.end);
+  const hasEdu = educations.length >= 1 && educations.some(e => e && txt(e.institution) && (txt(e.field) || txt(e.degree)));
+  const hasEduDates = educations.some(e => e && (txt(e.start) || txt(e.end)));
   const languages = Array.isArray(cv.languages) ? cv.languages : [];
   const hasLang = languages.length >= 1;
 
@@ -3088,7 +3103,7 @@ function mergeCvDataIntelligently(existing, incoming) {
   result.experiences = Array.isArray(result.experiences) ? result.experiences : [];
   const incExps = Array.isArray(incoming.experiences) ? incoming.experiences : [];
 
-  const norm = (s) => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const norm = (s) => toPlainText(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
 
   incExps.forEach(newExp => {
     const newComp = norm(newExp.company);
@@ -3108,7 +3123,7 @@ function mergeCvDataIntelligently(existing, incoming) {
 
       if (!match.desc && newExp.desc) {
         match.desc = newExp.desc;
-      } else if (newExp.desc && (newExp.desc.length > (match.desc || "").length + 30)) {
+      } else if (toPlainText(newExp.desc).length > toPlainText(match.desc).length + 30) {
         match.desc = newExp.desc;
       }
     } else {
@@ -4855,6 +4870,7 @@ if (typeof module !== "undefined" && module.exports) {
     renderCvQualityAuditor,
     optimizeEntireCvWithAI,
     parseCSV,
+    loadLibrary,
     DEFAULT_CV_DATA
   };
 }

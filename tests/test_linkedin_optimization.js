@@ -678,3 +678,20 @@ test("CV Quality Auditor: calculates 0-100 score, detects STAR action verbs and 
 });
 
 
+
+test("Regression: loadLibrary must NOT delete user CVs whose name contains 'Germano'", () => {
+  const store = {};
+  global.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); }, removeItem: k => { delete store[k]; } };
+  store.meucv_library = JSON.stringify([
+    { id: "cv_germano_original", name: "Germano - Currículo Original", data: {} },
+    { id: "cv_user_1", name: "Importado - Germano Carmo", data: { name: "Germano", experiences: [], educations: [], skills: [], languages: [], certs: [] } },
+    { id: "cv_user_2", data: { name: "Sem nome de CV" } }
+  ]);
+  app.appState.currentCvId = null;
+  app.loadLibrary();
+  const ids = app.appState.library.map(c => c.id);
+  assert.strictEqual(ids.includes("cv_user_1"), true, "User CV with 'Germano' in name must be kept");
+  assert.strictEqual(ids.includes("cv_user_2"), true, "CV without name must not crash/wipe library");
+  assert.strictEqual(ids.includes("cv_germano_original"), false, "Only the exact legacy demo entry is removed");
+  assert.strictEqual(JSON.parse(store.meucv_library).some(c => c.id === "cv_user_1"), true, "Persisted library keeps user CV");
+});
