@@ -262,9 +262,92 @@ function normalizeCvDates(cvData) {
   }
 }
 
+const THIRD_PERSON_PAST_VERBS_MAP = {
+  "atendeu": "Atender",
+  "solucionou": "Solucionar",
+  "administrou": "Administrar",
+  "apoiou": "Apoiar",
+  "elaborou": "Elaborar",
+  "desenvolveu": "Desenvolver",
+  "implementou": "Implementar",
+  "estruturou": "Estruturar",
+  "otimizou": "Otimizar",
+  "automatizou": "Automatizar",
+  "configurou": "Configurar",
+  "gerenciou": "Gerenciar",
+  "coordenou": "Coordenar",
+  "liderou": "Liderar",
+  "monitorou": "Monitorar",
+  "realizou": "Realizar",
+  "executou": "Executar",
+  "prestou": "Prestar",
+  "conduziu": "Conduzir",
+  "criou": "Criar",
+  "diagnosticou": "Diagnosticar",
+  "investigou": "Investigar",
+  "manteve": "Manter",
+  "assegurou": "Assegurar",
+  "garantiu": "Garantir",
+  "implantou": "Implantar",
+  "auditou": "Auditar",
+  "treinou": "Treinar",
+  "capacitou": "Capacitar",
+  "participou": "Participar",
+  "atuou": "Atuar",
+  "auxiliou": "Auxiliar",
+  "planejou": "Planejar",
+  "instalou": "Instalar",
+  "formatou": "Formatar",
+  "migrou": "Migrar",
+  "integrou": "Integrar",
+  "projetou": "Projetar",
+  "reduziu": "Reduzir",
+  "aumentou": "Aumentar",
+  "elevou": "Elevar",
+  "promoveu": "Promover",
+  "definiu": "Definir",
+  "estabeleceu": "Estabelecer",
+  "supervisionou": "Supervisionar",
+  "orientou": "Orientar",
+  "avaliou": "Avaliar"
+};
+
+function normalizeExperienceBullets(text) {
+  if (!text) return "";
+  const lines = String(text).split("\n");
+  const normalizedLines = lines.map(line => {
+    let trimmed = line.trim();
+    if (!trimmed) return line;
+
+    const prefixMatch = trimmed.match(/^([\s\-\*•\d\.\)]+\s*)/);
+    const prefix = prefixMatch ? prefixMatch[1] : "";
+    let content = prefix ? trimmed.slice(prefix.length) : trimmed;
+
+    const firstWordMatch = content.match(/^([a-zA-ZÀ-ÿ]+)(.*)/);
+    if (firstWordMatch) {
+      const firstWord = firstWordMatch[1];
+      const rest = firstWordMatch[2];
+      const lowerWord = firstWord.toLowerCase();
+      if (THIRD_PERSON_PAST_VERBS_MAP[lowerWord]) {
+        const replacement = THIRD_PERSON_PAST_VERBS_MAP[lowerWord];
+        content = replacement + rest;
+      }
+    }
+    return prefix ? `${prefix}${content}` : content;
+  });
+  return normalizedLines.join("\n");
+}
+
 function normalizeCvData(cvData) {
   if (!cvData) return;
   normalizeCvDates(cvData);
+  if (Array.isArray(cvData.experiences)) {
+    cvData.experiences.forEach(exp => {
+      if (exp && exp.desc) {
+        exp.desc = normalizeExperienceBullets(exp.desc);
+      }
+    });
+  }
   if (Array.isArray(cvData.educations)) {
     cvData.educations.forEach(edu => {
       if (edu.degree) edu.degree = translateAcademicDegreePt(edu.degree);
@@ -2261,8 +2344,12 @@ function evaluateCvQualityScore(cvData) {
   const actionVerbs = [
     "desenvolvi", "liderei", "implementei", "estruturei", "otimizei", "automatizei", "criei", 
     "coordenei", "reduzi", "aumentei", "projetei", "integrei", "migrei", "configurei", 
-    "administrei", "gerenciei", "auditei", "desenvolvimento", "liderança", "implementação", 
-    "automação", "otimização", "suporte", "manutenção", "análise"
+    "administrei", "gerenciei", "auditei", "desenvolver", "liderar", "implementar", 
+    "estruturar", "otimizar", "automatizar", "criar", "coordenar", "reduzir", "aumentar", 
+    "projetar", "integrar", "migrar", "configurar", "administrar", "gerenciar", "auditar", 
+    "prestar", "atender", "solucionar", "conduzir", "monitorar", "diagnosticar", "assegurar", 
+    "elaborar", "desenvolvimento", "liderança", "implementação", "automação", "otimização", 
+    "suporte", "manutenção", "análise"
   ];
 
   let totalVerbsFound = 0;
@@ -2290,7 +2377,7 @@ function evaluateCvQualityScore(cvData) {
     category: "experience",
     label: "Verbos de Ação Fortes (Metodologia STAR)",
     passed: totalVerbsFound >= 3,
-    tip: totalVerbsFound >= 3 ? "Realizações iniciadas com verbos fortes de impacto." : "Use verbos de ação no pretérito (ex: 'Desenvolvi', 'Liderei', 'Automatizei', 'Otimizei') no início de cada conquista."
+    tip: totalVerbsFound >= 3 ? "Realizações iniciadas com verbos fortes de impacto." : "Inicie cada conquista com verbos de ação no infinitivo impessoal (ex: 'Gerenciar', 'Diagnosticar', 'Implementar', 'Otimizar') ou no pretérito para cargos passados."
   });
 
   items.push({
@@ -2741,13 +2828,21 @@ async function improveTextWithAI(fieldKey, labelName, listIndex = null) {
   btn.innerHTML = '<span class="spinner" style="width: 12px; height: 12px; display: inline-block;"></span> Analisando...';
   
   const prompt = `
-    Você é um redator de currículos profissional especialista em recrutamento por sistemas ATS.
+    Você é um redator de currículos executivos e especialista em recrutamento por sistemas ATS no mercado corporativo brasileiro.
     Melhore o seguinte trecho de currículo da seção "${labelName}".
+    
+    DIRETRIZES DE REDAÇÃO E VOZ PROFISSIONAL:
+    - Se for descrição de Experiência Profissional:
+      * Use OBRIGATORIAMENTE o INFINITIVO IMPESSOAL no início de cada conquista e responsabilidade (ex: 'Prestar suporte técnico...', 'Diagnosticar e solucionar falhas...', 'Gerenciar acessos e permissões...', 'Conduzir treinamentos...').
+      * JAMAIS use a 3ª pessoa do singular do pretérito ('Atendeu', 'Solucionou', 'Administrou', 'Apoiou', 'Elaborou'), pois soa como biografia de terceiro ou laudo médico/pericial.
+      * Evite empilhar múltiplos verbos de ação telegráficos em série no início da frase (ex: NÃO escreva 'Atendeu, diagnosticou e resolveu'). Crie orações fluidas com: [Ação Forte no Infinitivo] + [Escopo / Tecnologias / Contexto] + [Impacto, Métrica ou SLA].
+    - Se for Resumo Profissional:
+      * Estruture um parágrafo executivo conciso, direto e de alto impacto de 3 a 5 linhas, destacando especialidade, principais competências e valor gerado.
     
     Retorne OBRIGATORIAMENTE um objeto JSON válido com o seguinte formato exato (sem formatação markdown extra, sem blocos de código markdown como \`\`\`json, e sem aspas fora do JSON):
     {
-      "optimizedText": "O texto do currículo melhorado, organizado em bullets de ação se for experiência ou em um parágrafo forte se for resumo.",
-      "explanation": "Uma explicação pedagógica em tópicos em português de por que estas mudanças foram efetuadas (ex: quais verbos de ação foram incluídos, como o foco em resultados e métricas foi aumentado, ou quais palavras irrelevantes foram eliminadas)."
+      "optimizedText": "O texto do currículo melhorado, organizado em bullets de ação no infinitivo se for experiência ou em um parágrafo executivo fluido se for resumo.",
+      "explanation": "Uma explicação pedagógica em tópicos em português de por que estas mudanças foram efetuadas (ex: adoção do infinitivo impessoal executivo, estruturação fluida de realizações, inclusão de métricas e eliminação de termos passivos)."
     }
 
     Texto Original:
@@ -2834,10 +2929,11 @@ async function adaptCvToJobWithAI() {
     REGRAS CRÍTICAS DE ESTRUTURAÇÃO E REDAÇÃO (Alinhadas ao Esqueleto do Currículo de Alta Performance):
     1. CABEÇALHO E CONTATOS: Preserve todas as informações de contato do candidato sem qualquer alteração.
     2. RESUMO PROFISSIONAL (3-5 LINHAS): Escreva um resumo extremamente objetivo, direto e de alto impacto de exatamente 3 a 5 linhas. Deve cobrir: Quem o candidato é + sua especialidade/área principal + anos de experiência + o valor que entrega e principais conquistas de impacto.
-    3. EXPERIÊNCIA PROFISSIONAL (Modelo STAR): Reescreva as descrições de realizações e responsabilidades dos cargos em formato de lista (bullets separados por \n) usando ativamente a metodologia STAR (Situação, Ação, Resultado).
-       - Foque sempre em impacto, dados e números reais (ex: "Aumentei a retenção de clientes em 30% ao implementar...", "Liderei equipe de X pessoas e reduzi o tempo de produção em Y%").
-       - NUNCA use frases passivas ou puramente genéricas (como "Responsável por campanhas de marketing" ou "Responsável por suporte"). Explique a ação e o resultado obtido.
-       - Use verbos de ação fortes no início das conquistas (Desenvolvi, Liderei, Otimizei, Implementou, Automatizou, Reduziu, Economizou).
+    3. EXPERIÊNCIA PROFISSIONAL (Modelo STAR - Padrão Executivo): Reescreva as descrições de realizações e responsabilidades dos cargos em formato de lista (bullets separados por \n) usando ativamente a metodologia STAR (Ação, Escopo, Resultado).
+       - REGRA MANDATÓRIA DE CONJUGAÇÃO: Use OBRIGATORIAMENTE o INFINITIVO IMPESSOAL no início de cada conquista (ex: 'Prestar suporte...', 'Diagnosticar e solucionar...', 'Gerenciar acessos...', 'Monitorar rotinas...', 'Conduzir programas...', 'Desenvolver...', 'Implementar...', 'Otimizar...').
+       - JAMAIS use a 3ª pessoa do singular do pretérito ('Atendeu', 'Solucionou', 'Administrou', 'Implementou', 'Automatizou', 'Reduziu'). Currículo é um documento do próprio profissional, não uma biografia de terceiro.
+       - NUNCA empilhe verbos telegráficos em série no início da frase (ex: NÃO escreva 'Atendeu, diagnosticou e resolveu'). Crie orações fluidas com: [Ação no Infinitivo] + [Escopo / Tecnologias / Contexto] + [Impacto, Métrica ou SLA].
+       - Foque sempre em impacto, dados e números reais (ex: "Conduzir treinamentos de conscientização em cibersegurança para mais de 100 colaboradores", "Reduzir o tempo de atendimento em 30% ao estruturar nova base de conhecimento").
     4. PRESERVAÇÃO E ADAPTAÇÃO DE PROJETOS E INICIATIVAS DE DESTAQUE: Nunca remova, oculte ou ignore projetos autorais, iniciativas de destaque, pesquisas, ferramentas ou plataformas desenvolvidas pelo candidato. Reescreva a descrição detalhada dessas iniciativas (bullets) adaptando-as para ressaltar a aplicação prática de competências e o uso de palavras-chaves que gerem valor para a vaga de trabalho pretendida (por exemplo, correlacionando-os com as necessidades técnicas ou processos descritos na vaga).
     5. PRESERVAÇÃO DE HABILIDADES DIFERENCIAIS: Se o candidato possui competências avançadas, especializações profundas, metodologias diferenciadas ou conhecimentos inovadores (como técnicas de segurança cibernética, engenharia de prompt, liderança ou ferramentas tecnológicas), essas habilidades devem ser preservadas e integradas de forma prática e estratégica no Resumo Profissional, nas Habilidades e nas Experiências, demonstrando seu uso no dia a dia da nova função.
     6. CERTIFICADOS, CURSOS E PROJETOS DETALHADOS (certs): Mantenha todos os certificados, cursos e projetos do candidato. Nunca copie descrições de projetos complexos verbatim (palavra por palavra) sem fazer a devida adaptação de contexto e vocabulário alinhados à vaga de emprego. Conecte cada projeto ou certificado de forma inteligente com os requisitos técnicos do cargo.
@@ -3257,10 +3353,14 @@ async function optimizeEntireCvWithAI() {
     1. PRESERVAÇÃO DE FATOS: Preserve 100% de empresas, datas, instituições de ensino, cargos reais e dados de contato. Jamais invente experiências inexistentes.
     2. RESUMO PROFISSIONAL DE ALTO IMPACTO:
        - Estruture um resumo executivo objetivo de 3 a 5 linhas destacando competências fundamentais, área de atuação e proposta de valor.
-    3. EXPERIÊNCIAS E METODOLOGIA STAR:
-       - Reescreva os bullet points de cada experiência profissional no padrão STAR (Situação, Tarefa, Ação e Resultado).
-       - Inicie cada bullet com verbos fortes de ação no pretérito perfeito (Desenvolvi, Liderei, Automatizei, Otimizei, Implementei, Estruturei, Reduzi, Projetei).
-       - Destaque métricas, volumes e tecnologias reais identificadas no contexto.
+    3. EXPERIÊNCIAS E METODOLOGIA STAR (PADRÃO EXECUTIVO BRASILEIRO):
+       - REGRA MANDATÓRIA DE CONJUGAÇÃO: Inicie cada bullet point usando OBRIGATORIAMENTE o INFINITIVO IMPESSOAL (ex: 'Prestar suporte...', 'Diagnosticar e solucionar...', 'Gerenciar acessos...', 'Monitorar rotinas...', 'Conduzir programas...', 'Desenvolver...', 'Implementar...', 'Otimizar...').
+       - JAMAIS use a 3ª pessoa do singular do pretérito ('Atendeu', 'Solucionou', 'Administrou', 'Apoiou', 'Elaborou', 'Implementou'). Currículo é um documento pessoal do candidato, NÃO uma biografia de terceiro nem um laudo pericial.
+       - FLUIDEZ E ESTRUTURA DOS BULLETS:
+         * NUNCA empilhe verbos telegráficos em série no início da frase (ex: NÃO escreva 'Atendeu diretamente usuários, diagnosticou e resolveu chamados...').
+         * Escreva orações fluidas e profissionais na fórmula de impacto: [Ação Forte no Infinitivo] + [Escopo / Tecnologias / Contexto] + [Impacto, Métrica ou SLA].
+         * Exemplo de excelência: 'Prestar suporte técnico avançado e atendimento a usuários locais e remotos, assegurando cumprimento rigoroso de SLAs e disponibilidade operacional.'
+       - Destaque métricas, volumes e tecnologias reais identificadas no contexto (ex: SLA, LAN/WAN, TCP/IP, VPNs, Windows/Linux, NAS, mais de 100 colaboradores).
     4. HABILIDADES TÉCNICAS E PROJETOS:
        - Mantenha e consolide a lista de habilidades, eliminando repetições.
        - Preserve todos os projetos e certificações existentes na chave "certs".
@@ -3408,7 +3508,7 @@ async function processRawTextImport() {
     2. Jamais deduza, invente ou alucine cursos, certificados, empresas ou competências que não estejam presentes no texto original.
     3. Identifique as seções principais: Dados de Contato, Resumo Profissional, Experiência Profissional, Educação, Habilidades, Idiomas, e Certificados/Projetos.
     4. RESUMO PROFISSIONAL: Caso o currículo original não possua um resumo ou tenha um resumo fraco, estruture um resumo objetivo de 3 a 5 linhas baseado estritamente na área e experiências informadas no texto.
-    5. EXPERIÊNCIA PROFISSIONAL: Estruture os bullets das experiências usando verbos de ação fortes no início (Desenvolvi, Liderei, Reduzi, Otimizei, Automatizei), mantendo métricas originais quando presentes.
+    5. EXPERIÊNCIA PROFISSIONAL: Estruture os bullets das experiências usando OBRIGATORIAMENTE o INFINITIVO IMPESSOAL (ex: 'Prestar suporte', 'Diagnosticar e solucionar', 'Gerenciar acessos', 'Monitorar rotinas', 'Conduzir treinamentos', 'Desenvolver', 'Implementar', 'Otimizar'). JAMAIS use a 3ª pessoa do singular do pretérito ('Atendeu', 'Solucionou', 'Administrou', 'Apoiou'). NUNCA empilhe múltiplos verbos telegráficos em série; mantenha dados, métricas e escopo reais com redação fluida.
     6. PROJETOS AUTORAIS E CERTIFICADOS: Na chave "certs", extraia TODOS os Certificados, Cursos Livres e Projetos de Software/Automação/Engenharia listados no texto (sistemas internos, ferramentas, plataformas, repositórios). Se for um projeto, coloque o nome do projeto em 'title', ano ou período em 'date', e na descrição 'desc' detalhe as tecnologias utilizadas e o impacto real.
     7. LOCALIZAÇÃO E IDIOMA OBRIGATÓRIO (PORTUGUÊS DO BRASIL): O resultado JSON deve estar 100% em Português do Brasil (pt-BR). Se o texto original extraído de PDFs ou do LinkedIn contiver termos acadêmicos em inglês padrão da plataforma (como 'Computer Engineering', 'Computer Science', 'Software Engineering', 'Bachelor', etc.), converta-os obrigatoriamente para a nomenclatura brasileira ('Engenharia de Computação', 'Ciência da Computação', 'Engenharia de Software', 'Bacharelado', etc.). As datas devem estar em português (ex: Jan 2021, Presente).
     8. Retorne APENAS um objeto JSON válido contendo exatamente as chaves abaixo. Não inclua markdown, aspas extras fora do JSON, ou qualquer texto adicional.
@@ -4868,6 +4968,7 @@ if (typeof window !== "undefined") {
   window.formatCvDate = formatCvDate;
   window.normalizeCvDates = normalizeCvDates;
   window.normalizeCvData = normalizeCvData;
+  window.normalizeExperienceBullets = normalizeExperienceBullets;
   window.translateAcademicFieldPt = translateAcademicFieldPt;
   window.translateAcademicDegreePt = translateAcademicDegreePt;
   window.detectExistingIdentity = detectExistingIdentity;
@@ -4890,6 +4991,7 @@ if (typeof module !== "undefined" && module.exports) {
     formatCvDate,
     normalizeCvDates,
     normalizeCvData,
+    normalizeExperienceBullets,
     translateAcademicFieldPt,
     translateAcademicDegreePt,
     detectExistingIdentity,

@@ -778,3 +778,61 @@ test("Select Active CV: persists active CV ID and restores correctly", () => {
   assert.strictEqual(app.appState.currentCvId, "cv_2", "Should restore cv_2 as active CV");
   assert.strictEqual(app.appState.currentCvData.name, "Pessoa 2");
 });
+
+test("Experience Voice Normalization: converts 3rd person past verbs to infinitivo impessoal", () => {
+  const rawBullets = [
+    "• Atendeu diretamente usuários, diagnosticou e resolveu chamados de sistemas corporativos.",
+    "• Solucionou problemas de conectividade LAN/WAN em TCP/IP e VPNs.",
+    "• Administrou contas, permissões de usuários e políticas de segurança.",
+    "• Apoiou rotinas de backup e continuidade de serviços.",
+    "• Elaborou documentação técnica e aplicou treinamentos."
+  ].join("\n");
+
+  const normalized = app.normalizeExperienceBullets(rawBullets);
+  const lines = normalized.split("\n");
+
+  assert.strictEqual(lines[0].startsWith("• Atender diretamente"), true);
+  assert.strictEqual(lines[1].startsWith("• Solucionar problemas"), true);
+  assert.strictEqual(lines[2].startsWith("• Administrar contas"), true);
+  assert.strictEqual(lines[3].startsWith("• Apoiar rotinas"), true);
+  assert.strictEqual(lines[4].startsWith("• Elaborar documentação"), true);
+});
+
+test("normalizeCvData automatically normalizes experience bullets in active CV", () => {
+  const cv = {
+    experiences: [
+      {
+        company: "Rodoviário Camilo dos Santos",
+        role: "Analista de TI",
+        desc: "• Atendeu chamados de suporte técnico\n• Implementou rotinas de monitoramento"
+      }
+    ],
+    educations: []
+  };
+
+  app.normalizeCvData(cv);
+  assert.strictEqual(cv.experiences[0].desc, "• Atender chamados de suporte técnico\n• Implementar rotinas de monitoramento");
+});
+
+test("evaluateCvQualityScore recognizes Infinitivo Impessoal action verbs", () => {
+  const cv = {
+    name: "Candidato Teste",
+    title: "Analista de TI",
+    email: "teste@exemplo.com",
+    phone: "(11) 99999-9999",
+    summary: "Profissional de TI com sólida experiência em infraestrutura, redes e suporte corporativo.",
+    experiences: [
+      {
+        company: "Empresa XPTO",
+        role: "Analista de TI",
+        desc: "• Prestar suporte técnico e diagnóstico de incidentes\n• Gerenciar infraestrutura e 50 servidores\n• Monitorar métricas de SLA atingindo 98%"
+      }
+    ],
+    educations: [{ institution: "Faculdade Tech", degree: "Bacharelado", field: "Sistemas de Informação" }],
+    skills: ["Windows", "Linux", "TCP/IP", "DNS", "DHCP", "VPN", "SLA", "Backup"]
+  };
+
+  const res = app.evaluateCvQualityScore(cv);
+  const actionVerbItem = res.items.find(i => i.id === "exp_action_verbs");
+  assert.strictEqual(actionVerbItem.passed, true, "Should pass action verbs check with infinitivo verbs");
+});
